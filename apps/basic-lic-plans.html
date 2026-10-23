@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LIC Benefit & Cover Calculator (Valuation 31.03.2026)</title>
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --primary-hover: #1d4ed8;
+            --secondary: #0d9488;
+            --bg-main: #f8fafc;
+            --card-bg: #ffffff;
+            --text-dark: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #cbd5e1;
+            --accent-green: #16a34a;
+            --accent-blue: #2563eb;
+            --accent-purple: #9333ea;
+            --accent-amber: #d97706;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-dark);
+            line-height: 1.5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%);
+            color: #ffffff;
+            padding: 24px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        header h1 {
+            font-size: 1.875rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        header p {
+            color: #94a3b8;
+            font-size: 0.95rem;
+        }
+
+        /* PRINT HEADER POLICY INFO BAR */
+        .print-policy-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+            background-color: #f1f5f9;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .info-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            color: var(--text-muted);
+        }
+
+        .info-value {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .layout-grid {
+            display: grid;
+            grid-template-columns: 360px 1fr;
+            gap: 24px;
+        }
+
+        @media (max-width: 992px) {
+            .layout-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--text-dark);
+        }
+
+        .form-control, select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.95rem;
+            transition: border-color 0.15s ease;
+            background-color: #fff;
+        }
+
+        .form-control:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+        }
+
+        .form-hint {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* Rider Options Styling */
+        .rider-item {
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px;
+            background-color: #f8fafc;
+            transition: all 0.2s ease;
+        }
+
+        .rider-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .rider-title-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .rider-title-wrap label {
+            margin-bottom: 0;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .badge-avail {
+            font-size: 0.75rem;
+            background-color: #dcfce7;
+            color: #15803d;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .badge-unavail {
+            font-size: 0.75rem;
+            background-color: #f1f5f9;
+            color: #94a3b8;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+
+        .rider-sa-input {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed #cbd5e1;
+        }
+
+        /* Summary Panel */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .summary-box {
+            background: #f1f5f9;
+            padding: 14px;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .summary-box.green { border-left-color: var(--accent-green); }
+        .summary-box.blue { border-left-color: var(--accent-blue); }
+        .summary-box.purple { border-left-color: var(--accent-purple); }
+        .summary-box.amber { border-left-color: var(--accent-amber); }
+
+        .summary-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            color: var(--text-muted);
+            letter-spacing: 0.05em;
+        }
+
+        .summary-val {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-top: 4px;
+        }
+
+        /* Table Design */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            text-align: right;
+            background-color: #fff;
+        }
+
+        th, td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #e2e8f0;
+            white-space: nowrap;
+        }
+
+        th {
+            background-color: #0f172a;
+            color: #ffffff;
+            font-weight: 600;
+            text-align: right;
+            position: sticky;
+            top: 0;
+        }
+
+        th:nth-child(1), td:nth-child(1),
+        th:nth-child(2), td:nth-child(2),
+        th:nth-child(3), td:nth-child(3) {
+            text-align: center;
+        }
+
+        tr:hover { background-color: #f1f5f9; }
+
+        tr.maturity-row {
+            background-color: #dcfce7 !important;
+            font-weight: 700;
+        }
+
+        tr.post-maturity-row {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+
+        tr.grand-total-row {
+            background-color: #e0f2fe;
+            font-weight: 800;
+            border-top: 2px solid #0284c7;
+        }
+
+        .highlight-survival {
+            color: #047857;
+            font-weight: 700;
+        }
+
+        /* Disclaimer */
+        .disclaimer-box {
+            margin-top: 20px;
+            padding: 14px 18px;
+            background-color: #fffbebf5;
+            border: 1px solid #fde68a;
+            border-radius: 8px;
+            color: #b45309;
+            font-size: 0.825rem;
+            line-height: 1.4;
+        }
+
+        .disclaimer-box strong { color: #92400e; }
+
+        /* Actions */
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .btn {
+            padding: 10px 16px;
+            border-radius: 6px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.9rem;
+            transition: opacity 0.2s;
+        }
+
+        .btn-primary { background-color: var(--primary); color: white; }
+        .btn-secondary { background-color: #475569; color: white; }
+        .btn:hover { opacity: 0.9; }
+
+        /* ADVANCED PRINT & PDF OPTIMIZATION STYLES */
+        @page {
+            size: A4 landscape;
+            margin: 8mm;
+        }
+
+        @media print {
+            body { padding: 0; background: #fff !important; color: #000 !important; font-size: 10pt; }
+            .container { max-width: 100% !important; width: 100% !important; margin: 0 !important; padding: 0 !important; }
+            .layout-grid { display: block !important; }
+            .card-inputs, .btn-group { display: none !important; }
+            .card { border: none !important; box-shadow: none !important; padding: 0 !important; margin: 0 !important; }
+            
+            header { background: none !important; color: #000 !important; padding: 0 0 8px 0 !important; border-bottom: 2px solid #000; margin-bottom: 12px !important; }
+            header h1 { font-size: 1.3rem !important; color: #000 !important; }
+            header p { color: #333 !important; font-size: 0.8rem !important; }
+
+            .print-policy-info {
+                display: grid !important;
+                grid-template-columns: repeat(5, 1fr) !important;
+                gap: 8px !important;
+                background-color: #f8fafc !important;
+                border: 1px solid #cbd5e1 !important;
+                padding: 8px 12px !important;
+                margin-bottom: 12px !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .info-label { font-size: 0.65rem !important; color: #475569 !important; }
+            .info-value { font-size: 0.9rem !important; color: #0f172a !important; }
+
+            .summary-grid { grid-template-columns: repeat(4, 1fr) !important; gap: 8px !important; margin-bottom: 12px !important; }
+            .summary-box { padding: 6px 10px !important; border: 1px solid #cbd5e1 !important; background: #f8fafc !important; }
+            .summary-val { font-size: 0.95rem !important; }
+            
+            .table-responsive { overflow: visible !important; border: none !important; width: 100% !important; }
+            table { width: 100% !important; table-layout: auto !important; border-collapse: collapse !important; font-size: 8pt !important; }
+            th, td { padding: 5px 6px !important; border: 1px solid #cbd5e1 !important; white-space: normal !important; }
+            th { background-color: #1e293b !important; color: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            tr.maturity-row { background-color: #e2e8f0 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            tr.grand-total-row { background-color: #e0f2fe !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            
+            .disclaimer-box { margin-top: 10px !important; padding: 6px 10px !important; font-size: 7pt !important; border: 1px solid #d1d5db !important; background-color: #f9fafb !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; page-break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>LIC Insurance Cover & Year-on-Year Benefit Calculator</h1>
+        <p>Interactive benefit illustration tool for LIC Plans with real-time dynamic calculations & rider limits</p>
+    </header>
+
+    <div class="layout-grid">
+        <!-- INPUTS SIDEBAR -->
+        <div class="card card-inputs">
+            <div class="card-title">Policy Configuration</div>
+
+            <!-- Select Plan -->
+            <div class="form-group">
+                <label for="planSelect">Select Plan</label>
+                <select id="planSelect" onchange="handlePlanChange()">
+                    <option value="714">714 - New Endowment Plan</option>
+                    <option value="715">715 - New Jeevan Anand</option>
+                    <option value="736">736 - Jeevan Labh</option>
+                    <option value="720">720 - 20 Year Money Back Plan</option>
+                    <option value="721">721 - 25 Year Money Back Plan</option>
+                </select>
+            </div>
+
+            <!-- Age at Entry -->
+            <div class="form-group">
+                <label for="entryAge">Age at Entry (Years)</label>
+                <input type="number" id="entryAge" class="form-control" value="30" oninput="calculateAll()">
+                <div class="form-hint" id="ageHint">Allowed Age: 8 to 50 years</div>
+            </div>
+
+            <!-- Policy Term -->
+            <div class="form-group">
+                <label for="policyTerm">Policy Term (Years)</label>
+                <select id="policyTerm" onchange="handleTermChange()"></select>
+                <div class="form-hint" id="pptHint">PPT: Same as Policy Term</div>
+            </div>
+
+            <!-- Basic Sum Assured -->
+            <div class="form-group">
+                <label for="basicSA">Basic Sum Assured (₹)</label>
+                <input type="number" id="basicSA" class="form-control" value="500000" step="10000" oninput="calculateAll()">
+                <div class="form-hint" id="saHint">Min: ₹2,00,000 | In multiples of ₹10,000</div>
+            </div>
+
+            <!-- RIDERS OPTION -->
+            <div class="card-title" style="margin-top: 24px;">Available Riders</div>
+
+            <!-- Rider: AB -->
+            <div class="rider-item" id="item-ab">
+                <div class="rider-header">
+                    <div class="rider-title-wrap">
+                        <input type="checkbox" id="riderAB" onchange="toggleRider('AB')">
+                        <label for="riderAB">Accident Benefit (AB)</label>
+                    </div>
+                    <span id="badge-ab" class="badge-avail">✓ Available</span>
+                </div>
+                <div class="rider-sa-input" id="sa-wrap-ab" style="display: none;">
+                    <label for="saAB">AB Rider SA (₹)</label>
+                    <input type="number" id="saAB" class="form-control" oninput="calculateAll()">
+                    <div class="form-hint" id="hint-ab">Max: Min(3×BSA, ₹1 Cr)</div>
+                </div>
+            </div>
+
+            <!-- Rider: ADDB -->
+            <div class="rider-item" id="item-addb">
+                <div class="rider-header">
+                    <div class="rider-title-wrap">
+                        <input type="checkbox" id="riderADDB" onchange="toggleRider('ADDB')">
+                        <label for="riderADDB">Accidental Death & Disability (ADDB)</label>
+                    </div>
+                    <span id="badge-addb" class="badge-avail">✓ Available</span>
+                </div>
+                <div class="rider-sa-input" id="sa-wrap-addb" style="display: none;">
+                    <label for="saADDB">ADDB Rider SA (₹)</label>
+                    <input type="number" id="saADDB" class="form-control" oninput="calculateAll()">
+                    <div class="form-hint" id="hint-addb">Max: Min(BSA, ₹1 Cr)</div>
+                </div>
+            </div>
+
+            <!-- Rider: Term Rider -->
+            <div class="rider-item" id="item-term">
+                <div class="rider-header">
+                    <div class="rider-title-wrap">
+                        <input type="checkbox" id="riderTerm" onchange="toggleRider('TERM')">
+                        <label for="riderTerm">Term Assurance Rider</label>
+                    </div>
+                    <span id="badge-term" class="badge-avail">✓ Available</span>
+                </div>
+                <div class="rider-sa-input" id="sa-wrap-term" style="display: none;">
+                    <label for="saTerm">Term Rider SA (₹)</label>
+                    <input type="number" id="saTerm" class="form-control" oninput="calculateAll()">
+                    <div class="form-hint" id="hint-term">Max: Min(BSA, ₹25 L)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MAIN DISPLAY / TABLE -->
+        <div>
+            <!-- POLICY DETAILS DISPLAY BAR (VISIBLE ON SCREEN & PRINT) -->
+            <div class="print-policy-info">
+                <div class="info-item">
+                    <span class="info-label">Plan Name</span>
+                    <span class="info-value" id="dispPlanName">New Endowment Plan</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Plan No.</span>
+                    <span class="info-value" id="dispPlanNo">714</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Age at Entry</span>
+                    <span class="info-value" id="dispAge">30 Years</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Policy Term</span>
+                    <span class="info-value" id="dispTerm">20 Years</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Premium Paying Term</span>
+                    <span class="info-value" id="dispPPT">20 Years</span>
+                </div>
+            </div>
+
+            <!-- Metric Cards -->
+            <div class="summary-grid">
+                <div class="summary-box blue">
+                    <div class="summary-label">Base SA Cover</div>
+                    <div class="summary-val" id="sumBaseSA">₹5,00,000</div>
+                </div>
+                <div class="summary-box green">
+                    <div class="summary-label">Estimated Bonus Rate</div>
+                    <div class="summary-val" id="sumBonusRate">₹41 / 1000</div>
+                </div>
+                <div class="summary-box amber" id="boxSurvivalSB" style="display: none;">
+                    <div class="summary-label">Total Survival Benefits</div>
+                    <div class="summary-val" id="sumSurvivalSB">₹0</div>
+                </div>
+                <div class="summary-box purple">
+                    <div class="summary-label" id="lblMaturity">Maturity Benefit</div>
+                    <div class="summary-val" id="sumMaturity">₹0</div>
+                </div>
+                <div class="summary-box green" id="boxTotalReturns" style="display: none;">
+                    <div class="summary-label">Total Returns (SB + Maturity)</div>
+                    <div class="summary-val" id="sumTotalReturns">₹0</div>
+                </div>
+            </div>
+
+            <!-- Table Card -->
+            <div class="card">
+                <div class="card-title">
+                    <span>Year-on-Year Benefit Schedule</span>
+                    <div class="btn-group" style="margin-top:0;">
+                        <button class="btn btn-primary" onclick="window.print()">Print / PDF</button>
+                        <button class="btn btn-secondary" onclick="exportCSV()">Export CSV</button>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table id="benefitTable">
+                        <thead>
+                            <tr>
+                                <th>Policy Yr</th>
+                                <th>Age</th>
+                                <th>Prem Pay Status</th>
+                                <th>Annual Bonus Add (₹)</th>
+                                <th>Accrued Bonus (₹)</th>
+                                <th>Normal Death Cover (₹)</th>
+                                <th>Accidental Death Cover (₹)</th>
+                                <th>Survival / Maturity Benefit (₹)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody"></tbody>
+                    </table>
+                </div>
+
+                <!-- Mandatory Disclaimer -->
+                <div class="disclaimer-box">
+                    <strong>Disclaimer:</strong> Bonuses and Final Additional Bonuses (FAB) displayed in this chart are approximate and based on the LIC actuarial valuation as of <strong>31.03.2026</strong>. Actual bonus declarations in future years may vary based on LIC's ongoing performance and actuarial results.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// PLAN CONFIGURATIONS & RULES
+const PLAN_DATA = {
+    "714": {
+        name: "New Endowment Plan",
+        minAge: 8, maxAge: 50,
+        terms: Array.from({length: 24}, (_, i) => i + 12),
+        riders: ["AB", "ADDB", "TERM"],
+        getPPT: (term) => term,
+        getBaseDeathSA: (bsa) => bsa
+    },
+    "715": {
+        name: "New Jeevan Anand",
+        minAge: 18, maxAge: 50,
+        terms: Array.from({length: 21}, (_, i) => i + 15),
+        riders: ["AB", "ADDB", "TERM"],
+        getPPT: (term) => term,
+        getBaseDeathSA: (bsa) => bsa * 1.25
+    },
+    "736": {
+        name: "Jeevan Labh",
+        minAge: 8, maxAge: 59,
+        terms: [16, 21, 25],
+        riders: ["AB", "ADDB", "TERM"],
+        getPPT: (term) => {
+            if (term == 16) return 10;
+            if (term == 21) return 15;
+            if (term == 25) return 16;
+            return term;
+        },
+        getBaseDeathSA: (bsa) => bsa
+    },
+    "720": {
+        name: "20 Yr Money Back Plan",
+        minAge: 13, maxAge: 50,
+        terms: [20],
+        riders: ["AB", "ADDB", "TERM"],
+        getPPT: (term) => 15,
+        getBaseDeathSA: (bsa) => bsa * 1.25,
+        survival: { 5: 0.20, 10: 0.20, 15: 0.20 },
+        maturityRatio: 0.40
+    },
+    "721": {
+        name: "25 Yr Money Back Plan",
+        minAge: 13, maxAge: 45,
+        terms: [25],
+        riders: ["AB", "ADDB", "TERM"],
+        getPPT: (term) => 20,
+        getBaseDeathSA: (bsa) => bsa * 1.25,
+        survival: { 5: 0.15, 10: 0.15, 15: 0.15, 20: 0.15 },
+        maturityRatio: 0.40
+    }
+};
+
+window.onload = function() {
+    handlePlanChange();
+};
+
+function handlePlanChange() {
+    const planId = document.getElementById("planSelect").value;
+    const plan = PLAN_DATA[planId];
+
+    document.getElementById("entryAge").min = plan.minAge;
+    document.getElementById("entryAge").max = plan.maxAge;
+    document.getElementById("ageHint").innerText = `Allowed Age: ${plan.minAge} to ${plan.maxAge} years`;
+
+    const termSelect = document.getElementById("policyTerm");
+    termSelect.innerHTML = "";
+    plan.terms.forEach(t => {
+        const opt = document.createElement("option");
+        opt.value = t;
+        opt.innerText = t + " Years";
+        termSelect.appendChild(opt);
+    });
+
+    handleTermChange();
+    updateRiderAvailability();
+}
+
+function handleTermChange() {
+    const planId = document.getElementById("planSelect").value;
+    const plan = PLAN_DATA[planId];
+    const term = parseInt(document.getElementById("policyTerm").value);
+    const ppt = plan.getPPT(term);
+
+    document.getElementById("pptHint").innerText = `Premium Payment Term (PPT): ${ppt} Years`;
+    calculateAll();
+}
+
+function updateRiderAvailability() {
+    const planId = document.getElementById("planSelect").value;
+    const planRiders = PLAN_DATA[planId].riders;
+    const allRiders = ["AB", "ADDB", "TERM"];
+
+    allRiders.forEach(r => {
+        const code = r.toLowerCase();
+        const badgeEl = document.getElementById(`badge-${code}`);
+        const chkEl = document.getElementById(`rider${r}`);
+
+        if (planRiders.includes(r)) {
+            badgeEl.className = "badge-avail";
+            badgeEl.innerHTML = "✓ Available";
+            chkEl.disabled = false;
+        } else {
+            badgeEl.className = "badge-unavail";
+            badgeEl.innerHTML = "✕ Not Available";
+            chkEl.checked = false;
+            chkEl.disabled = true;
+            const saWrap = document.getElementById(`sa-wrap-${code}`);
+            if (saWrap) saWrap.style.display = "none";
+        }
+    });
+    calculateAll();
+}
+
+function toggleRider(riderCode) {
+    if (riderCode === 'AB' && document.getElementById("riderAB").checked) {
+        document.getElementById("riderADDB").checked = false;
+        document.getElementById("sa-wrap-addb").style.display = "none";
+    } else if (riderCode === 'ADDB' && document.getElementById("riderADDB").checked) {
+        document.getElementById("riderAB").checked = false;
+        document.getElementById("sa-wrap-ab").style.display = "none";
+    }
+
+    const bsa = parseFloat(document.getElementById("basicSA").value) || 0;
+
+    if (riderCode === 'AB') {
+        const checked = document.getElementById("riderAB").checked;
+        document.getElementById("sa-wrap-ab").style.display = checked ? "block" : "none";
+        if (checked) document.getElementById("saAB").value = Math.min(3 * bsa, 10000000);
+    } else if (riderCode === 'ADDB') {
+        const checked = document.getElementById("riderADDB").checked;
+        document.getElementById("sa-wrap-addb").style.display = checked ? "block" : "none";
+        if (checked) document.getElementById("saADDB").value = Math.min(bsa, 10000000);
+    } else if (riderCode === 'TERM') {
+        const checked = document.getElementById("riderTerm").checked;
+        document.getElementById("sa-wrap-term").style.display = checked ? "block" : "none";
+        if (checked) document.getElementById("saTerm").value = Math.min(bsa, 2500000);
+    }
+
+    calculateAll();
+}
+
+function getBonusRate(planId, term, bsa) {
+    let rate = 0;
+    if (planId === "714") {
+        if (term <= 15) rate = (bsa >= 500000) ? 37 : 35;
+        else if (term <= 20) rate = (bsa >= 500000) ? 41 : 39;
+        else rate = (bsa >= 500000) ? 47 : 45;
+    } else if (planId === "715") {
+        if (term <= 15) rate = (bsa >= 500000) ? 40 : 38;
+        else if (term <= 20) rate = (bsa >= 500000) ? 44 : 42;
+        else rate = (bsa >= 500000) ? 48 : 46;
+    } else if (planId === "736") {
+        if (term === 16) rate = (bsa >= 1000000) ? 43 : (bsa >= 500000 ? 42 : 40);
+        else if (term === 21) rate = (bsa >= 1000000) ? 47 : (bsa >= 500000 ? 46 : 44);
+        else if (term === 25) rate = (bsa >= 1000000) ? 50 : (bsa >= 500000 ? 49 : 47);
+    } else if (planId === "720") {
+        rate = (bsa >= 500000) ? 38 : 36;
+    } else if (planId === "721") {
+        rate = (bsa >= 500000) ? 43 : 41;
+    }
+    return rate;
+}
+
+function getFABRate(planId, duration, bsa) {
+    if (duration < 15 || bsa < 200000) return 0;
+
+    if (planId === "714" || planId === "736") {
+        const fabMap = {
+            15: 20, 16: 25, 17: 30, 18: 35, 19: 50, 20: 70, 21: 100, 22: 150,
+            23: 250, 24: 350, 25: 450, 26: 550, 27: 670, 28: 790, 29: 910, 30: 1100,
+            31: 1300, 32: 1550, 33: 1800, 34: 2050, 35: 2300, 36: 2550, 37: 2800,
+            38: 3050, 39: 3300
+        };
+        if (duration >= 40) return 3550;
+        return fabMap[duration] || 0;
+    } else if (planId === "715") {
+        const fabMap = {
+            15: 20, 16: 35, 17: 50, 18: 75, 19: 100, 20: 135, 21: 140, 22: 160, 23: 180
+        };
+        if (duration >= 24) return 185;
+        return fabMap[duration] || 0;
+    } else if (planId === "720" || planId === "721") {
+        if (duration >= 15 && duration <= 19) return 20;
+        if (duration === 20) return 40;
+        if (duration >= 21 && duration <= 24) return 40;
+        if (duration >= 25) return 225;
+    }
+    return 0;
+}
+
+function calculateAll() {
+    const planId = document.getElementById("planSelect").value;
+    const plan = PLAN_DATA[planId];
+    const age = parseInt(document.getElementById("entryAge").value) || 30;
+    const term = parseInt(document.getElementById("policyTerm").value) || 20;
+    const bsa = parseFloat(document.getElementById("basicSA").value) || 0;
+    const ppt = plan.getPPT(term);
+
+    // UPDATE PRINT BANNER VALUES
+    document.getElementById("dispPlanName").innerText = plan.name;
+    document.getElementById("dispPlanNo").innerText = planId;
+    document.getElementById("dispAge").innerText = age + " Years";
+    document.getElementById("dispTerm").innerText = term + " Years";
+    document.getElementById("dispPPT").innerText = ppt + " Years";
+
+    let abSA = 0, addbSA = 0, termSA = 0;
+
+    if (document.getElementById("riderAB").checked && plan.riders.includes("AB")) {
+        let raw = parseFloat(document.getElementById("saAB").value) || 0;
+        abSA = Math.min(raw, 3 * bsa, 10000000);
+    }
+    if (document.getElementById("riderADDB").checked && plan.riders.includes("ADDB")) {
+        let raw = parseFloat(document.getElementById("saADDB").value) || 0;
+        addbSA = Math.min(raw, bsa, 10000000);
+    }
+    if (document.getElementById("riderTerm").checked && plan.riders.includes("TERM")) {
+        let raw = parseFloat(document.getElementById("saTerm").value) || 0;
+        termSA = Math.min(raw, bsa, 2500000);
+    }
+
+    const bonusRate = getBonusRate(planId, term, bsa);
+    const annualBonus = (bsa / 1000) * bonusRate;
+
+    document.getElementById("sumBaseSA").innerText = "₹" + bsa.toLocaleString('en-IN');
+    document.getElementById("sumBonusRate").innerText = `₹${bonusRate} / 1000 SA`;
+
+    const tbody = document.getElementById("tableBody");
+    tbody.innerHTML = "";
+
+    let accruedBonus = 0;
+    let finalMaturityPayout = 0;
+    let totalSurvivalPayouts = 0;
+
+    for (let yr = 1; yr <= term; yr++) {
+        const curAge = age + yr;
+        accruedBonus += annualBonus;
+
+        const isPremPaying = yr <= ppt;
+        const premStatus = isPremPaying ? "Paying" : "PPT Over";
+
+        const deathFABRate = getFABRate(planId, yr, bsa);
+        const deathFABAmount = (bsa / 1000) * deathFABRate;
+
+        const baseDeathSA = plan.getBaseDeathSA(bsa);
+        const normalDeathCover = baseDeathSA + accruedBonus + termSA + deathFABAmount;
+        const accidentalDeathCover = normalDeathCover + abSA + addbSA;
+
+        let survivalPayout = 0;
+        if (plan.survival && plan.survival[yr]) {
+            survivalPayout = bsa * plan.survival[yr];
+            totalSurvivalPayouts += survivalPayout;
+        }
+
+        let isMaturityYear = (yr === term);
+        if (isMaturityYear) {
+            const matFABRate = getFABRate(planId, term, bsa);
+            const matFABAmount = (bsa / 1000) * matFABRate;
+            let maturityBase = plan.maturityRatio ? (bsa * plan.maturityRatio) : bsa;
+            finalMaturityPayout = maturityBase + accruedBonus + matFABAmount;
+            survivalPayout = finalMaturityPayout;
+        }
+
+        const tr = document.createElement("tr");
+        if (isMaturityYear) tr.className = "maturity-row";
+
+        tr.innerHTML = `
+            <td>${yr}</td>
+            <td>${curAge}</td>
+            <td>${premStatus}</td>
+            <td>₹${annualBonus.toLocaleString('en-IN')}</td>
+            <td>₹${accruedBonus.toLocaleString('en-IN')}</td>
+            <td><strong>₹${Math.round(normalDeathCover).toLocaleString('en-IN')}</strong></td>
+            <td><strong>₹${Math.round(accidentalDeathCover).toLocaleString('en-IN')}</strong></td>
+            <td class="${survivalPayout > 0 ? 'highlight-survival' : ''}">
+                ${survivalPayout > 0 ? (isMaturityYear ? '★ Maturity: ' : 'SB: ') + '₹' + Math.round(survivalPayout).toLocaleString('en-IN') : '-'}
+            </td>
+        `;
+        tbody.appendChild(tr);
+    }
+
+    // Free Cover Row for Plan 715
+    if (planId === "715") {
+        const postMatTr = document.createElement("tr");
+        postMatTr.className = "post-maturity-row";
+        postMatTr.innerHTML = `
+            <td>${term}+</td>
+            <td>${age + term}+</td>
+            <td>Life-Long Cover</td>
+            <td>-</td>
+            <td>-</td>
+            <td><strong>₹${bsa.toLocaleString('en-IN')}</strong></td>
+            <td><strong>₹${bsa.toLocaleString('en-IN')}</strong></td>
+            <td>Post-Maturity Free Cover</td>
+        `;
+        tbody.appendChild(postMatTr);
+    }
+
+    // Money Back Summary Box visibility & calculation
+    const totalOverallReturns = finalMaturityPayout + totalSurvivalPayouts;
+    const isMoneyBack = (planId === "720" || planId === "721");
+
+    document.getElementById("boxSurvivalSB").style.display = isMoneyBack ? "block" : "none";
+    document.getElementById("boxTotalReturns").style.display = isMoneyBack ? "block" : "none";
+
+    if (isMoneyBack) {
+        document.getElementById("sumSurvivalSB").innerText = "₹" + Math.round(totalSurvivalPayouts).toLocaleString('en-IN');
+        document.getElementById("sumTotalReturns").innerText = "₹" + Math.round(totalOverallReturns).toLocaleString('en-IN');
+        document.getElementById("lblMaturity").innerText = "Maturity at Term End";
+
+        const grandTr = document.createElement("tr");
+        grandTr.className = "grand-total-row";
+        grandTr.innerHTML = `
+            <td colspan="5" style="text-align: right;"><strong>TOTAL PAYOUT SUMMARY (SB Installments + Final Maturity)</strong></td>
+            <td colspan="2" style="text-align: right;">Survival Benefits: <strong>₹${Math.round(totalSurvivalPayouts).toLocaleString('en-IN')}</strong></td>
+            <td><strong>Grand Total: ₹${Math.round(totalOverallReturns).toLocaleString('en-IN')}</strong></td>
+        `;
+        tbody.appendChild(grandTr);
+    } else {
+        document.getElementById("lblMaturity").innerText = "Estimated Maturity Benefit";
+    }
+
+    document.getElementById("sumMaturity").innerText = "₹" + Math.round(finalMaturityPayout).toLocaleString('en-IN');
+}
+
+function exportCSV() {
+    let csv = [];
+    let rows = document.querySelectorAll("#benefitTable tr");
+
+    for (let i = 0; i < rows.length; i++) {
+        let row = [], cols = rows[i].querySelectorAll("td, th");
+        for (let j = 0; j < cols.length; j++) {
+            let text = cols[j].innerText.replace(/,/g, '').replace(/₹/g, '').replace(/\n/g, ' ');
+            row.push('"' + text.trim() + '"');
+        }
+        csv.push(row.join(","));
+    }
+
+    let csvFile = new Blob([csv.join("\n")], { type: "text/csv" });
+    let downloadLink = document.createElement("a");
+    downloadLink.download = `LIC_Plan_${document.getElementById("planSelect").value}_Illustration.csv`;
+    downloadLink.href = window.URL.createObjectURL(csvFile);
+    downloadLink.style.display = "none";
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+}
+</script>
+</body>
+</html>
