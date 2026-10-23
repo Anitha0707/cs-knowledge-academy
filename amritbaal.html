@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LIC's Amritbaal (Plan No. 774) - Interactive Benefit Illustration</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        lic: {
+                            blue: '#003366',
+                            gold: '#DAA520',
+                            yellow: '#FFCC00',
+                            dark: '#002244',
+                            light: '#F4F7FA',
+                            accent: '#0284C7'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Google Font: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Chart.js for graphical display -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            .print-break-inside-avoid { break-inside: avoid; }
+            body { background: white !important; }
+            .card-shadow { box-shadow: none !important; border: 1px solid #e2e8f0 !important; }
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+    </style>
+</head>
+<body class="h-full text-slate-800 flex flex-col antialiased selection:bg-lic-yellow selection:text-lic-dark">
+
+    <!-- Header / Navbar -->
+    <header class="bg-lic-blue text-white shadow-lg sticky top-0 z-50 border-b-4 border-lic-gold no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-wrap justify-between items-center gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="bg-lic-gold text-lic-dark p-2.5 rounded-xl font-black text-xl tracking-wider shadow-inner flex items-center justify-center">
+                    <i class="fa-solid font-bold fa-shield-halved text-2xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight text-white flex items-center gap-2">
+                        LIC's AMRITBAAL
+                        <span class="text-xs bg-lic-yellow text-lic-dark font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Plan No. 774</span>
+                    </h1>
+                    <p class="text-xs text-slate-200 font-medium">Non-Participating, Non-Linked, Individual, Savings Life Insurance Plan</p>
+                </div>
+            </div>
+
+            <!-- Header Action Controls -->
+            <div class="flex items-center space-x-3 text-sm">
+                <div class="bg-slate-900/40 p-1 rounded-lg border border-slate-700 flex items-center">
+                    <button id="fmtRs" onclick="setCurrencyFormat('exact')" class="px-2.5 py-1 text-xs rounded-md font-semibold transition-all bg-lic-gold text-lic-dark shadow">
+                        Exact ₹
+                    </button>
+                    <button id="fmtLakh" onclick="setCurrencyFormat('lakh')" class="px-2.5 py-1 text-xs rounded-md font-semibold text-slate-300 hover:text-white transition-all">
+                        Lakhs / Cr
+                    </button>
+                </div>
+                <button onclick="window.print()" class="bg-amber-500 hover:bg-amber-400 text-lic-dark font-bold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1.5 transition shadow">
+                    <i class="fa-solid fa-print"></i>
+                    <span>Print Report</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+        <!-- Form and Input Controls (No-Print for compact print layout) -->
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 sm:p-6 no-print">
+            <div class="flex items-center justify-between pb-4 mb-5 border-b border-slate-100">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-sliders text-lic-accent text-lg"></i>
+                    <h2 class="text-lg font-bold text-slate-900">Policy Plan Parameters</h2>
+                </div>
+                <span class="text-xs text-slate-500 font-medium"><i class="fa-solid fa-circle-info text-blue-500 mr-1"></i> No premium calculation required</span>
+            </div>
+
+            <form id="amritbaalForm" onsubmit="event.preventDefault(); calculateIllustration();" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+
+                <!-- Child Age at Entry -->
+                <div>
+                    <label for="entryAge" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                        Child's Entry Age
+                    </label>
+                    <div class="relative">
+                        <select id="entryAge" onchange="updateOptionsAndCalculate()" class="w-full bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-xl focus:ring-2 focus:ring-lic-blue focus:border-lic-blue p-3 font-semibold pr-8 appearance-none transition">
+                            <option value="0">0 Years (30 days completed)</option>
+                            <option value="1">1 Year</option>
+                            <option value="2">2 Years</option>
+                            <option value="3">3 Years</option>
+                            <option value="4">4 Years</option>
+                            <option value="5">5 Years</option>
+                            <option value="6">6 Years</option>
+                            <option value="7">7 Years</option>
+                            <option value="8">8 Years</option>
+                            <option value="9">9 Years</option>
+                            <option value="10">10 Years</option>
+                            <option value="11">11 Years</option>
+                            <option value="12">12 Years</option>
+                            <option value="13">13 Years</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-500">
+                            <i class="fa-solid fa-chevron-down text-xs"></i>
+                        </div>
+                    </div>
+                    <p class="text-[11px] text-slate-500 mt-1">Allowed: 30 days to 13 completed years</p>
+                </div>
+
+                <!-- Maturity Age -->
+                <div>
+                    <label for="maturityAge" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                        Maturity Age
+                    </label>
+                    <div class="relative">
+                        <select id="maturityAge" onchange="updateOptionsAndCalculate()" class="w-full bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-xl focus:ring-2 focus:ring-lic-blue focus:border-lic-blue p-3 font-semibold pr-8 appearance-none transition">
+                            <!-- Populated via JS -->
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-500">
+                            <i class="fa-solid fa-chevron-down text-xs"></i>
+                        </div>
+                    </div>
+                    <p class="text-[11px] text-slate-500 mt-1">Allowed: 18 to 25 Years</p>
+                </div>
+
+                <!-- Premium Payment Type & PPT -->
+                <div>
+                    <label for="paymentType" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                        Payment Mode & PPT
+                    </label>
+                    <div class="relative">
+                        <select id="paymentType" onchange="updateOptionsAndCalculate()" class="w-full bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-xl focus:ring-2 focus:ring-lic-blue focus:border-lic-blue p-3 font-semibold pr-8 appearance-none transition">
+                            <option value="LP_5">Limited Premium (PPT: 5 Years)</option>
+                            <option value="LP_6">Limited Premium (PPT: 6 Years)</option>
+                            <option value="LP_7">Limited Premium (PPT: 7 Years)</option>
+                            <option value="SP">Single Premium (PPT: 1 Payment)</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-500">
+                            <i class="fa-solid fa-chevron-down text-xs"></i>
+                        </div>
+                    </div>
+                    <p id="ptValidationNotice" class="text-[11px] text-slate-500 mt-1">Min PT: Limited (10 Yrs), Single (5 Yrs)</p>
+                </div>
+
+                <!-- Cover Option Select -->
+                <div>
+                    <label for="coverOption" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                        Insurance Cover Option
+                    </label>
+                    <div class="relative">
+                        <select id="coverOption" onchange="updateOptionsAndCalculate()" class="w-full bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-xl focus:ring-2 focus:ring-lic-blue focus:border-lic-blue p-3 font-semibold pr-8 appearance-none transition">
+                            <!-- Dynamic Options -->
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-500">
+                            <i class="fa-solid fa-chevron-down text-xs"></i>
+                        </div>
+                    </div>
+                    <p id="coverOptionDesc" class="text-[11px] font-medium text-lic-accent mt-1">Option details</p>
+                </div>
+
+                <!-- Basic Sum Assured (BSA) -->
+                <div>
+                    <div class="flex justify-between items-center mb-1.5">
+                        <label for="basicSumAssured" class="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                            Basic Sum Assured (₹)
+                        </label>
+                        <span class="text-xs text-slate-500 font-semibold" id="bsaInWords">₹ 2,00,000</span>
+                    </div>
+                    <input type="number" id="basicSumAssured" step="25000" min="200000" value="200000" oninput="updateOptionsAndCalculate()" class="w-full bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-xl focus:ring-2 focus:ring-lic-blue focus:border-lic-blue p-3 font-semibold transition" placeholder="Min 200,000">
+
+                    <!-- Preset BSA buttons -->
+                    <div class="flex flex-wrap gap-1.5 mt-2">
+                        <button type="button" onclick="setBSA(200000)" class="text-[11px] px-2 py-0.5 rounded bg-slate-200 hover:bg-lic-blue hover:text-white transition font-medium">2 Lakhs</button>
+                        <button type="button" onclick="setBSA(500000)" class="text-[11px] px-2 py-0.5 rounded bg-slate-200 hover:bg-lic-blue hover:text-white transition font-medium">5 Lakhs</button>
+                        <button type="button" onclick="setBSA(1000000)" class="text-[11px] px-2 py-0.5 rounded bg-slate-200 hover:bg-lic-blue hover:text-white transition font-medium">10 Lakhs</button>
+                        <button type="button" onclick="setBSA(2500000)" class="text-[11px] px-2 py-0.5 rounded bg-slate-200 hover:bg-lic-blue hover:text-white transition font-medium">25 Lakhs</button>
+                        <button type="button" onclick="setBSA(5000000)" class="text-[11px] px-2 py-0.5 rounded bg-slate-200 hover:bg-lic-blue hover:text-white transition font-medium">50 Lakhs</button>
+                    </div>
+                </div>
+
+                <!-- Optional Estimated Premium Input -->
+                <div>
+                    <label for="estimatedPremium" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                        Est. Premium Paid (Annual/Single ₹) <span class="normal-case text-slate-400 font-normal">(Optional)</span>
+                    </label>
+                    <input type="number" id="estimatedPremium" step="1000" min="0" value="0" oninput="updateOptionsAndCalculate()" class="w-full bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-xl focus:ring-2 focus:ring-lic-blue focus:border-lic-blue p-3 font-semibold transition" placeholder="e.g. 25000">
+                    <p class="text-[11px] text-slate-500 mt-1">Used to evaluate 7x / 10x / 1.25x premium multiples for Death Cover.</p>
+                </div>
+
+            </form>
+
+            <!-- Error Banner Container -->
+            <div id="errorAlert" class="hidden mt-4 p-3.5 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-xs font-semibold flex items-center gap-2">
+                <i class="fa-solid fa-circle-exclamation text-base"></i>
+                <span id="errorMessage">Invalid inputs.</span>
+            </div>
+        </div>
+
+        <!-- Policy Summary Cards -->
+        <section class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
+            <!-- Card 1: Term & PPT -->
+            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden flex flex-col justify-between">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-bold uppercase text-slate-500 tracking-wider">Policy Duration</span>
+                    <i class="fa-solid fa-calendar-days text-lic-blue text-sm"></i>
+                </div>
+                <div>
+                    <div id="cardPT" class="text-xl sm:text-2xl font-black text-slate-900">18 Years</div>
+                    <div id="cardPPT" class="text-xs font-semibold text-lic-accent mt-0.5">PPT: 7 Years</div>
+                </div>
+            </div>
+
+            <!-- Card 2: Age at Maturity & Risk Commencement -->
+            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden flex flex-col justify-between">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-bold uppercase text-slate-500 tracking-wider">Risk Start</span>
+                    <i class="fa-solid fa-shield-virus text-emerald-600 text-sm"></i>
+                </div>
+                <div>
+                    <div id="cardRiskStart" class="text-xl sm:text-2xl font-black text-slate-900">Age 8</div>
+                    <div id="cardMaturityAge" class="text-xs font-semibold text-slate-600 mt-0.5">Maturity Age: 18 Yrs</div>
+                </div>
+            </div>
+
+            <!-- Card 3: Guaranteed Addition Rate -->
+            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden flex flex-col justify-between">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-bold uppercase text-slate-500 tracking-wider">Guaranteed Addition</span>
+                    <i class="fa-solid fa-coins text-lic-gold text-sm"></i>
+                </div>
+                <div>
+                    <div id="cardAnnualGA" class="text-xl sm:text-2xl font-black text-slate-900">₹ 16,000 /yr</div>
+                    <div class="text-xs font-semibold text-slate-500 mt-0.5">Rate: ₹80 per 1000 BSA</div>
+                </div>
+            </div>
+
+            <!-- Card 4: Base Death Cover -->
+            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden flex flex-col justify-between">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-bold uppercase text-slate-500 tracking-wider">Sum Assured on Death</span>
+                    <i class="fa-solid fa-heart-pulse text-rose-500 text-sm"></i>
+                </div>
+                <div>
+                    <div id="cardDeathCover" class="text-xl sm:text-2xl font-black text-slate-900">₹ 2,00,000</div>
+                    <div id="cardOptionLabel" class="text-xs font-semibold text-slate-500 mt-0.5 truncate">Option 1 (7x Cover)</div>
+                </div>
+            </div>
+
+            <!-- Card 5: Total Guaranteed Maturity Value -->
+            <div class="col-span-2 sm:col-span-2 lg:col-span-1 bg-gradient-to-br from-lic-blue to-slate-900 text-white p-4 rounded-2xl border border-slate-800 shadow-md relative overflow-hidden flex flex-col justify-between">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-bold uppercase text-lic-yellow tracking-wider">Maturity Benefit</span>
+                    <i class="fa-solid fa-award text-lic-yellow text-base"></i>
+                </div>
+                <div>
+                    <div id="cardMaturityTotal" class="text-2xl sm:text-3xl font-black text-white">₹ 4,88,000</div>
+                    <div id="cardGATotal" class="text-xs font-medium text-slate-300 mt-0.5">BSA + ₹2,88,000 Total GA</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Chart Section -->
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 no-print">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                    <i class="fa-solid fa-chart-line text-lic-accent"></i>
+                    Yearwise Growth: Maturity Value vs Death Cover
+                </h3>
+                <div class="text-xs text-slate-500 flex gap-4">
+                    <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-lic-blue inline-block"></span> Guaranteed Maturity Value</span>
+                    <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-rose-500 inline-block"></span> Death Benefit Payable</span>
+                </div>
+            </div>
+            <div class="h-64 sm:h-72 w-full relative">
+                <canvas id="benefitChart"></canvas>
+            </div>
+        </section>
+
+        <!-- Yearwise Benefit Illustration Table -->
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden print-shadow-none">
+            <div class="p-4 sm:p-5 border-b border-slate-200 bg-slate-50/80 flex flex-wrap justify-between items-center gap-3">
+                <div>
+                    <h3 class="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
+                        <i class="fa-solid fa-table-list text-lic-blue"></i>
+                        Yearwise Guaranteed Benefit Illustration
+                    </h3>
+                    <p class="text-xs text-slate-500 mt-0.5">Guaranteed Additions added at end of each policy year @ ₹80 per ₹1,000 Basic Sum Assured</p>
+                </div>
+                <div class="text-xs bg-emerald-50 text-emerald-800 border border-emerald-200 px-3 py-1.5 rounded-lg font-medium flex items-center gap-1.5">
+                    <i class="fa-solid fa-check-circle text-emerald-600"></i> Guaranteed Additions apply for FULL Policy Term
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs sm:text-sm border-collapse">
+                    <thead>
+                        <tr class="bg-slate-100/90 text-slate-700 uppercase font-bold text-[11px] tracking-wider border-b border-slate-200">
+                            <th class="py-3 px-3 text-center border-r border-slate-200 w-12">Year</th>
+                            <th class="py-3 px-3 text-center border-r border-slate-200 w-16">Age</th>
+                            <th class="py-3 px-3 text-center border-r border-slate-200 w-28">Risk Status</th>
+                            <th class="py-3 px-3 text-right border-r border-slate-200">Addition for Year (GA)</th>
+                            <th class="py-3 px-3 text-right border-r border-slate-200">Cumulative GA</th>
+                            <th class="py-3 px-3 text-right border-r border-slate-200 bg-slate-200/50">Maturity Value at Year End</th>
+                            <th class="py-3 px-3 text-right">Death Benefit Payable</th>
+                        </tr>
+                    </thead>
+                    <tbody id="illustrationTableBody" class="divide-y divide-slate-200 text-slate-800 font-medium">
+                        <!-- Dynamic Rows -->
+                    </tbody>
+                    <tfoot id="illustrationTableFoot" class="bg-slate-900 text-white font-bold text-xs sm:text-sm border-t-2 border-lic-gold">
+                        <!-- Dynamic Summary Row -->
+                    </tfoot>
+                </table>
+            </div>
+        </section>
+
+        <!-- Plan Notes and Terms -->
+        <section class="bg-slate-100 rounded-2xl p-5 text-slate-600 text-xs space-y-3 border border-slate-200 print-break-inside-avoid">
+            <h4 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                <i class="fa-solid fa-circle-info text-lic-blue"></i> Important Terms & Features (LIC Amritbaal Plan 774)
+            </h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <ul class="space-y-1.5 list-disc list-inside">
+                    <li><strong class="text-slate-700">Guaranteed Addition (GA):</strong> Accrues at ₹80 per ₹1,000 Basic Sum Assured at the end of each policy year throughout the Policy Term.</li>
+                    <li><strong class="text-slate-700">Maturity Benefit:</strong> Basic Sum Assured (BSA) plus total accumulated Guaranteed Additions over the full Policy Term.</li>
+                    <li><strong class="text-slate-700">Risk Commencement Rules:</strong> For entry age &lt; 8 years, risk commences either after 2 years from Date of Commencement (DOC) or upon reaching 8 years of age, whichever is earlier. For entry age 8+ years, risk starts immediately.</li>
+                </ul>
+                <ul class="space-y-1.5 list-disc list-inside">
+                    <li><strong class="text-slate-700">Death Benefit Before Risk Commencement:</strong> Refund of total premiums paid (excluding taxes/extra premiums) without interest.</li>
+                    <li><strong class="text-slate-700">Death Benefit After Risk Commencement:</strong> Sum Assured on Death plus accrued Guaranteed Additions till year of death. In case of paid-up policy, death cover is minimum 105% of total premiums paid.</li>
+                    <li><strong class="text-slate-700">Policy Eligibility Limits:</strong> Min Age at Entry: 30 days (0 Yrs); Max Age at Entry: 13 Yrs. Min Maturity Age: 18 Yrs; Max Maturity Age: 25 Yrs. Min Sum Assured: ₹2,00,000.</li>
+                </ul>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-400 text-xs py-5 px-4 text-center mt-auto border-t border-slate-800 no-print">
+        <p class="max-w-4xl mx-auto">
+            This tool provides an illustrative calculation based on standard parameters of LIC's Amritbaal Plan No. 774 slide guidelines. Premium calculation is not included. Guaranteed additions are fixed at ₹80/1000 BSA as per official scheme parameters.
+        </p>
+    </footer>
+
+    <!-- Application Logic Script -->
+    <script>
+        // Global state for calculations
+        let currencyFormat = 'exact'; // 'exact' or 'lakh'
+        let chartInstance = null;
+
+        // Cover options data mapping
+        const coverOptionsMap = {
+            'LP': [
+                { id: 'OPT1', name: 'Option 1: 7 Times Cover', multiplier: 7, label: 'Higher of 7x Annual Premium or Basic SA' },
+                { id: 'OPT2', name: 'Option 2: 10 Times Cover', multiplier: 10, label: 'Higher of 10x Annual Premium or Basic SA' }
+            ],
+            'SP': [
+                { id: 'OPT3', name: 'Option 3: 1.25 Times Cover', multiplier: 1.25, label: 'Higher of 1.25x Single Premium or Basic SA' },
+                { id: 'OPT4', name: 'Option 4: 10 Times Cover', multiplier: 10, label: '10x Single Premium' }
+            ]
+        };
+
+        // On initial page load
+        window.onload = function() {
+            updateMaturityAgeDropdown();
+            updateCoverOptionsDropdown();
+            calculateIllustration();
+        };
+
+        // Format currency helper
+        function formatCurrency(val, forceExact = false) {
+            if (val === undefined || val === null || isNaN(val)) return '₹ 0';
+            const num = Number(val);
+
+            if (currencyFormat === 'lakh' && !forceExact) {
+                if (num >= 10000000) {
+                    return '₹ ' + (num / 10000000).toFixed(2) + ' Cr';
+                } else if (num >= 100000) {
+                    return '₹ ' + (num / 100000).toFixed(2) + ' Lakh';
+                }
+            }
+
+            return '₹ ' + Math.round(num).toLocaleString('en-IN');
+        }
+
+        // Toggle currency format mode
+        function setCurrencyFormat(fmt) {
+            currencyFormat = fmt;
+            const btnRs = document.getElementById('fmtRs');
+            const btnLakh = document.getElementById('fmtLakh');
+
+            if (fmt === 'exact') {
+                btnRs.className = "px-2.5 py-1 text-xs rounded-md font-semibold transition-all bg-lic-gold text-lic-dark shadow";
+                btnLakh.className = "px-2.5 py-1 text-xs rounded-md font-semibold text-slate-300 hover:text-white transition-all";
+            } else {
+                btnLakh.className = "px-2.5 py-1 text-xs rounded-md font-semibold transition-all bg-lic-gold text-lic-dark shadow";
+                btnRs.className = "px-2.5 py-1 text-xs rounded-md font-semibold text-slate-300 hover:text-white transition-all";
+            }
+
+            calculateIllustration();
+        }
+
+        // Helper to quickly select Sum Assured preset
+        function setBSA(val) {
+            document.getElementById('basicSumAssured').value = val;
+            updateOptionsAndCalculate();
+        }
+
+        // Dynamically update Maturity Age based on Entry Age
+        function updateMaturityAgeDropdown() {
+            const entryAge = parseInt(document.getElementById('entryAge').value, 10);
+            const maturitySelect = document.getElementById('maturityAge');
+            const currentSelectedMatAge = parseInt(maturitySelect.value, 10) || 18;
+
+            maturitySelect.innerHTML = '';
+
+            // Allowed Maturity Age range: 18 to 25
+            const minMatAge = 18;
+            const maxMatAge = 25;
+
+            for (let mAge = minMatAge; mAge <= maxMatAge; mAge++) {
+                const opt = document.createElement('option');
+                opt.value = mAge;
+                opt.textContent = `${mAge} Years (Term: ${mAge - entryAge} Yrs)`;
+                if (mAge === currentSelectedMatAge || (isNaN(currentSelectedMatAge) && mAge === 18)) {
+                    opt.selected = true;
+                }
+                maturitySelect.appendChild(opt);
+            }
+        }
+
+        // Update cover option select list depending on LP vs SP
+        function updateCoverOptionsDropdown() {
+            const payType = document.getElementById('paymentType').value;
+            const isSingle = payType === 'SP';
+            const category = isSingle ? 'SP' : 'LP';
+            const coverSelect = document.getElementById('coverOption');
+            
+            const prevVal = coverSelect.value;
+            coverSelect.innerHTML = '';
+
+            const options = coverOptionsMap[category];
+            options.forEach(opt => {
+                const el = document.createElement('option');
+                el.value = opt.id;
+                el.textContent = opt.name;
+                coverSelect.appendChild(el);
+            });
+
+            // Set sensible default if switching
+            if (isSingle) {
+                if (prevVal === 'OPT4') coverSelect.value = 'OPT4';
+                else coverSelect.value = 'OPT3';
+            } else {
+                if (prevVal === 'OPT2') coverSelect.value = 'OPT2';
+                else coverSelect.value = 'OPT1';
+            }
+        }
+
+        // Master Handler on parameter updates
+        function updateOptionsAndCalculate() {
+            updateMaturityAgeDropdown();
+            updateCoverOptionsDropdown();
+            calculateIllustration();
+        }
+
+        // Main Core Calculation Engine
+        function calculateIllustration() {
+            const entryAge = parseInt(document.getElementById('entryAge').value, 10);
+            const maturityAge = parseInt(document.getElementById('maturityAge').value, 10);
+            const policyTerm = maturityAge - entryAge;
+            const payType = document.getElementById('paymentType').value;
+            const isSingle = payType === 'SP';
+            const ppt = isSingle ? 1 : parseInt(payType.split('_')[1], 10);
+            const bsa = parseFloat(document.getElementById('basicSumAssured').value) || 0;
+            const estPremium = parseFloat(document.getElementById('estimatedPremium').value) || 0;
+            const coverOptId = document.getElementById('coverOption').value;
+
+            // Update BSA in words helper text
+            document.getElementById('bsaInWords').textContent = formatCurrency(bsa, true);
+
+            // Validation Checking
+            const errorAlert = document.getElementById('errorAlert');
+            const errorMessage = document.getElementById('errorMessage');
+            let hasError = false;
+
+            const minTermRequired = isSingle ? 5 : 10;
+            if (policyTerm < minTermRequired) {
+                errorMessage.textContent = `Policy Term (${policyTerm} Years) is less than minimum required (${minTermRequired} Years) for ${isSingle ? 'Single Premium' : 'Limited Premium'}. Please increase Maturity Age.`;
+                hasError = true;
+            } else if (bsa < 200000) {
+                errorMessage.textContent = 'Minimum Basic Sum Assured is ₹ 2,00,000 (2 Lacs).';
+                hasError = true;
+            }
+
+            if (hasError) {
+                errorAlert.classList.remove('hidden');
+            } else {
+                errorAlert.classList.add('hidden');
+            }
+
+            // Calculate Guaranteed Addition (GA)
+            // GA Rate = Rs 80 per 1000 Sum Assured per year
+            const annualGA = (bsa / 1000) * 80;
+            const totalGA = annualGA * policyTerm;
+            const maturityBenefitTotal = bsa + totalGA;
+
+            // Calculate Sum Assured on Death Base
+            let deathCoverBase = bsa;
+            let coverOptionText = '';
+
+            if (coverOptId === 'OPT1') {
+                // Higher of 7x Annualized Premium or Basic SA
+                const coverFromPrem = 7 * estPremium;
+                deathCoverBase = Math.max(coverFromPrem, bsa);
+                coverOptionText = `Option 1 (7x Cover): Higher of 7x Premium or BSA`;
+            } else if (coverOptId === 'OPT2') {
+                // Higher of 10x Annualized Premium or Basic SA
+                const coverFromPrem = 10 * estPremium;
+                deathCoverBase = Math.max(coverFromPrem, bsa);
+                coverOptionText = `Option 2 (10x Cover): Higher of 10x Premium or BSA`;
+            } else if (coverOptId === 'OPT3') {
+                // Higher of 1.25x Single Premium or Basic SA
+                const coverFromPrem = 1.25 * estPremium;
+                deathCoverBase = Math.max(coverFromPrem, bsa);
+                coverOptionText = `Option 3 (1.25x Cover): Higher of 1.25x SP or BSA`;
+            } else if (coverOptId === 'OPT4') {
+                // Option 4: 10 Times Single Premium
+                const coverFromPrem = 10 * estPremium;
+                // If user hasn't specified premium, default cover to BSA minimum or 10x
+                deathCoverBase = estPremium > 0 ? coverFromPrem : bsa;
+                coverOptionText = `Option 4 (10x Cover): 10x Single Premium`;
+            }
+
+            document.getElementById('coverOptionDesc').textContent = coverOptionText;
+
+            // Risk Commencement Start Age/Year
+            // Rules: Entry 0-6: Starts 2 years from DOC or age 8. Entry 7: Age 8 (Year 1). Entry 8-13: Immediate (Year 1).
+            let riskStartPolicyYear = 1;
+            if (entryAge <= 6) {
+                riskStartPolicyYear = Math.min(3, 8 - entryAge + 1); // Policy Year when risk starts (1-indexed)
+            } else if (entryAge === 7) {
+                riskStartPolicyYear = 1; // Completed 8 years at end of year 1 / start of year 2 or immediately at age 8
+            } else {
+                riskStartPolicyYear = 1;
+            }
+
+            // Update Summary KPI Cards
+            document.getElementById('cardPT').textContent = `${policyTerm} Years`;
+            document.getElementById('cardPPT').textContent = isSingle ? `PPT: Single Payment` : `PPT: ${ppt} Years`;
+            
+            const riskStartAge = entryAge + (riskStartPolicyYear - 1);
+            document.getElementById('cardRiskStart').textContent = entryAge >= 8 ? `Immediate (Age ${entryAge})` : `Year ${riskStartPolicyYear} (Age ${riskStartAge})`;
+            document.getElementById('cardMaturityAge').textContent = `Maturity Age: ${maturityAge} Yrs`;
+
+            document.getElementById('cardAnnualGA').textContent = `${formatCurrency(annualGA)} /yr`;
+            document.getElementById('cardDeathCover').textContent = formatCurrency(deathCoverBase);
+            document.getElementById('cardOptionLabel').textContent = coverOptionText;
+
+            document.getElementById('cardMaturityTotal').textContent = formatCurrency(maturityBenefitTotal);
+            document.getElementById('cardGATotal').textContent = `BSA + ${formatCurrency(totalGA)} Total GA`;
+
+            // Render Benefit Illustration Table
+            renderTable(entryAge, policyTerm, riskStartPolicyYear, annualGA, bsa, deathCoverBase, estPremium, isSingle, ppt);
+
+            // Render Chart
+            renderChart(policyTerm, entryAge, riskStartPolicyYear, annualGA, bsa, deathCoverBase);
+        }
+
+        // Render Yearwise Benefits Table
+        function renderTable(entryAge, PT, riskStartYear, annualGA, bsa, deathCoverBase, estPremium, isSingle, ppt) {
+            const tbody = document.getElementById('illustrationTableBody');
+            const tfoot = document.getElementById('illustrationTableFoot');
+            tbody.innerHTML = '';
+
+            let cumulativeGA = 0;
+            let chartLabels = [];
+            let chartMaturityData = [];
+            let chartDeathData = [];
+
+            for (let year = 1; year <= PT; year++) {
+                const currentAge = entryAge + year;
+                cumulativeGA += annualGA;
+                const cumMaturityValue = bsa + cumulativeGA;
+
+                // Determine Risk Commencement Status for this year
+                const isRiskCovered = year >= riskStartYear;
+
+                // Death Benefit calculation
+                let deathBenefitText = '';
+                let deathBenefitValue = 0;
+
+                if (isRiskCovered) {
+                    deathBenefitValue = deathCoverBase + cumulativeGA;
+                    deathBenefitText = formatCurrency(deathBenefitValue);
+                } else {
+                    // Before Risk Commencement: Refund of Premiums without interest
+                    const premsPaid = isSingle ? estPremium : Math.min(year, ppt) * estPremium;
+                    deathBenefitValue = premsPaid;
+                    deathBenefitText = premsPaid > 0 ? `${formatCurrency(premsPaid)} (Prem. Refund)` : 'Refund of Premiums';
+                }
+
+                // Row formatting
+                const tr = document.createElement('tr');
+                tr.className = year % 2 === 0 ? 'bg-slate-50/60 hover:bg-slate-100 transition' : 'bg-white hover:bg-slate-100 transition';
+
+                tr.innerHTML = `
+                    <td class="py-2.5 px-3 text-center border-r border-slate-200 font-bold text-slate-700">${year}</td>
+                    <td class="py-2.5 px-3 text-center border-r border-slate-200">${currentAge} Yrs</td>
+                    <td class="py-2.5 px-3 text-center border-r border-slate-200">
+                        ${isRiskCovered ? 
+                            `<span class="inline-flex items-center gap-1 bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full"><i class="fa-solid fa-shield text-[9px]"></i> Active</span>` : 
+                            `<span class="inline-flex items-center gap-1 bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded-full"><i class="fa-solid fa-clock text-[9px]"></i> Deferred</span>`
+                        }
+                    </td>
+                    <td class="py-2.5 px-3 text-right border-r border-slate-200 text-lic-accent font-semibold">${formatCurrency(annualGA)}</td>
+                    <td class="py-2.5 px-3 text-right border-r border-slate-200 text-slate-700">${formatCurrency(cumulativeGA)}</td>
+                    <td class="py-2.5 px-3 text-right border-r border-slate-200 bg-slate-100/40 font-bold text-slate-900">${formatCurrency(cumMaturityValue)}</td>
+                    <td class="py-2.5 px-3 text-right font-bold text-rose-700">${deathBenefitText}</td>
+                `;
+
+                tbody.appendChild(tr);
+            }
+
+            // Summary Footer Row at Maturity
+            const totalMaturity = bsa + cumulativeGA;
+            tfoot.innerHTML = `
+                <tr>
+                    <td colspan="3" class="py-3 px-3 text-left">MATURITY BENEFIT AT YEAR ${PT} (AGE ${entryAge + PT})</td>
+                    <td class="py-3 px-3 text-right text-lic-yellow">${formatCurrency(annualGA * PT)}</td>
+                    <td class="py-3 px-3 text-right text-lic-yellow">${formatCurrency(cumulativeGA)}</td>
+                    <td class="py-3 px-3 text-right text-lic-yellow text-base font-extrabold">${formatCurrency(totalMaturity)}</td>
+                    <td class="py-3 px-3 text-right text-emerald-300 font-bold">Sum Assured + Accrued GA</td>
+                </tr>
+            `;
+        }
+
+        // Render Graphical Chart using Chart.js
+        function renderChart(PT, entryAge, riskStartYear, annualGA, bsa, deathCoverBase) {
+            const ctx = document.getElementById('benefitChart').getContext('2d');
+
+            const labels = [];
+            const maturityValues = [];
+            const deathBenefits = [];
+
+            let cumGA = 0;
+            for (let year = 1; year <= PT; year++) {
+                labels.push(`Yr ${year} (Age ${entryAge + year})`);
+                cumGA += annualGA;
+                maturityValues.push(bsa + cumGA);
+
+                if (year >= riskStartYear) {
+                    deathBenefits.push(deathCoverBase + cumGA);
+                } else {
+                    deathBenefits.push(bsa); // Representative base for chart comparison
+                }
+            }
+
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Maturity Benefit (BSA + Accrued GA)',
+                            data: maturityValues,
+                            borderColor: '#003366',
+                            backgroundColor: 'rgba(0, 51, 102, 0.08)',
+                            fill: true,
+                            tension: 0.2,
+                            borderWidth: 3,
+                            pointRadius: 3,
+                            pointHoverRadius: 6
+                        },
+                        {
+                            label: 'Death Benefit (Sum Assured on Death + GA)',
+                            data: deathBenefits,
+                            borderColor: '#f43f5e',
+                            backgroundColor: 'transparent',
+                            borderDash: [5, 5],
+                            tension: 0.2,
+                            borderWidth: 2,
+                            pointRadius: 3,
+                            pointHoverRadius: 6
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += formatCurrency(context.parsed.y, true);
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            ticks: {
+                                callback: function(value) {
+                                    if (value >= 10000000) return '₹' + (value / 10000000).toFixed(1) + 'Cr';
+                                    if (value >= 100000) return '₹' + (value / 100000).toFixed(0) + 'L';
+                                    return '₹' + value;
+                                },
+                                font: { size: 10 }
+                            },
+                            grid: { color: '#f1f5f9' }
+                        },
+                        x: {
+                            ticks: { font: { size: 10 } },
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>

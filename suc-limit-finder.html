@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CS Knowledge Academy - SUC Limit Finder</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f3f6f8;color:#172033;font-family:Arial,sans-serif}
+.wrap{max-width:900px;margin:auto;padding:18px}
+.header{background:linear-gradient(135deg,#0f766e,#164e63);color:#fff;border-radius:20px;padding:25px;box-shadow:0 8px 24px #0001}
+.brand{font-size:14px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;opacity:.9}
+h1{margin:7px 0;font-size:30px}
+.subtitle{line-height:1.5}
+.card{background:#fff;border:1px solid #dbe3e8;border-radius:18px;margin-top:16px;padding:22px;box-shadow:0 4px 15px #0000000d}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:17px}
+label{display:block;font-weight:700;margin-bottom:7px}
+select,input{width:100%;padding:13px;border:1px solid #cbd5e1;border-radius:10px;font-size:16px;background:#fff}
+.help,.note{font-size:12px;color:#64748b;line-height:1.5}
+.help{margin-top:5px}
+button{border:0;border-radius:10px;padding:14px;font-weight:700;font-size:16px;cursor:pointer}
+.primary{background:#0f766e;color:#fff;width:100%}
+.secondary{background:#e2e8f0;width:100%;margin-top:10px}
+.error{display:none;color:#b91c1c;background:#fef2f2;border:1px solid #fecaca;padding:11px;border-radius:9px;margin-top:14px}
+.results{display:none;margin-top:20px}
+.summary{background:#f0fdfa;border:1px solid #99f6e4;border-radius:14px;padding:17px;margin-bottom:15px}
+.summary h2{margin:0 0 7px;color:#115e59;font-size:20px}
+.table-wrap{overflow-x:auto;border:1px solid #dbe3e8;border-radius:13px}
+table{width:100%;border-collapse:collapse;min-width:700px;background:#fff}
+th,td{padding:13px 12px;border-bottom:1px solid #e2e8f0;text-align:left;vertical-align:top}
+th{background:#f1f5f9}
+td.limit{font-weight:800;font-size:21px;color:#065f46;white-space:nowrap}
+.formula{font-size:13px;color:#475569;line-height:1.45}
+@media(max-width:600px){.grid{grid-template-columns:1fr}h1{font-size:25px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="header">
+<div class="brand">CS Knowledge Academy</div>
+<h1>SUC Limit Finder</h1>
+<div class="subtitle">Enter category, age and existing SUC under Group 1 and Group 2. All four applicable Non-Medical limits will be displayed.</div>
+</div>
+
+<div class="card">
+<div class="grid">
+<div>
+<label>Category</label>
+<select id="cat" onchange="categoryChanged()">
+<option value="">Select Category</option>
+<option>Major Students</option>
+<option>Preferred</option>
+<option>Special</option>
+<option>General</option>
+</select>
+</div>
+
+<div>
+<label>Age</label>
+<input id="age" type="number" min="18" max="50" placeholder="18–50">
+<div id="agehelp" class="help">Preferred / Special / General: 18–50 years.</div>
+</div>
+
+<div>
+<label>Existing SUC — Group 1</label>
+<input id="s1" type="number" min="0" step=".01" value="0" placeholder="Amount in lacs">
+<div class="help">Enter ₹ lacs.</div>
+</div>
+
+<div>
+<label>Existing SUC — Group 2</label>
+<input id="s2" type="number" min="0" step=".01" value="0" placeholder="Amount in lacs">
+<div class="help">Enter ₹ lacs.</div>
+</div>
+
+<div style="grid-column:1/-1">
+<button class="primary" onclick="calc()">Calculate All Available Limits</button>
+<button class="secondary" onclick="resetAll()">Reset</button>
+</div>
+</div>
+
+<div id="err" class="error"></div>
+
+<div id="results" class="results">
+<div class="summary">
+<h2>Non-Medical Limits Now Available</h2>
+<div id="summary"></div>
+</div>
+
+<div class="table-wrap">
+<table>
+<thead>
+<tr><th>Output Type</th><th>Available Limit</th><th>Calculation / Rule</th></tr>
+</thead>
+<tbody id="rows"></tbody>
+</table>
+</div>
+
+<div class="note" style="margin-top:14px">
+For Major Students, the supplied source specifies “Pursuing Regular College Courses”, age 18–30, applicable to Resident Indians only.
+The Major Students limits are Group I ₹25 lacs, Group II ₹20 lacs, Both together ₹25 lacs and Video Medical ₹30 lacs.
+</div>
+</div>
+</div>
+</div>
+
+<script>
+const L={"Preferred": {"18-35": {"Group 1": 50, "Group 2": 30, "Combined": 50, "Video Medical": 100}, "36-45": {"Group 1": 25, "Group 2": 20, "Combined": 25, "Video Medical": 50}, "46-50": {"Group 1": 13, "Group 2": 10, "Combined": 13, "Video Medical": 20}}, "Special": {"18-35": {"Group 1": 30, "Group 2": 25, "Combined": 30, "Video Medical": 50}, "36-45": {"Group 1": 20, "Group 2": 15, "Combined": 20, "Video Medical": 30}, "46-50": {"Group 1": 10, "Group 2": 8, "Combined": 10, "Video Medical": 15}}, "General": {"18-35": {"Group 1": 12, "Group 2": 8, "Combined": 12, "Video Medical": 12}, "36-45": {"Group 1": 8, "Group 2": 5, "Combined": 8, "Video Medical": 8}, "46-50": {"Group 1": 5, "Group 2": 3, "Combined": 5, "Video Medical": 5}}, "Major Students": {"18-30": {"Group 1": 25, "Group 2": 20, "Combined": 25, "Video Medical": 30}}};
+
+const band=(a,cat)=>{
+ if(cat==="Major Students") return a>=18&&a<=30?"18-30":null;
+ return a>=18&&a<=35?"18-35":a<=45?"36-45":a<=50?"46-50":null;
+};
+
+const money=x=>x>=100&&Number.isInteger(x/100)
+ ?"₹"+x/100+" Crore"
+ :"₹"+(Number.isInteger(x)?x:x.toFixed(2))+" lacs";
+
+const num=id=>Math.max(0,Number(document.getElementById(id).value)||0);
+
+function categoryChanged(){
+ const cat=document.getElementById("cat").value;
+ document.getElementById("agehelp").textContent =
+   cat==="Major Students"
+   ? "Major Students: 18–30 years (Pursuing Regular College Courses)."
+   : "Preferred / Special / General: 18–50 years.";
+}
+
+function calc(){
+ const cat=document.getElementById("cat").value;
+ const age=Number(document.getElementById("age").value);
+ const s1=num("s1"),s2=num("s2");
+ const e=document.getElementById("err"),r=document.getElementById("results");
+
+ e.style.display="none";r.style.display="none";
+
+ if(!cat||!age){
+   e.textContent="Please select Category and enter Age.";
+   e.style.display="block";return;
+ }
+
+ const b=band(age,cat);
+ if(!b){
+   e.textContent=cat==="Major Students"
+    ?"For Major Students, age must be between 18 and 30 years."
+    :"Age must be between 18 and 50 years.";
+   e.style.display="block";return;
+ }
+
+ const x=L[cat][b],total=s1+s2;
+
+ // Group 1: lower of (G1 limit - existing G1 SUC) and (G1 limit - existing combined SUC)
+ const g1a=Math.max(0,x["Group 1"]-s1);
+ const g1b=Math.max(0,x["Group 1"]-total);
+ const g1=Math.min(g1a,g1b);
+
+ // Group 2: lower of (G2 limit - existing G2 SUC) and (G1 limit - existing combined SUC)
+ const g2a=Math.max(0,x["Group 2"]-s2);
+ const g2b=Math.max(0,x["Group 1"]-total);
+ const g2=Math.min(g2a,g2b);
+
+ const combined=Math.max(0,x["Combined"]-total);
+ const video=Math.max(0,x["Video Medical"]-total);
+
+ document.getElementById("summary").innerHTML=
+   "<b>"+cat+"</b> | Age <b>"+age+"</b> ("+b+") | Existing G1: <b>"+money(s1)+
+   "</b> | Existing G2: <b>"+money(s2)+"</b> | Total: <b>"+money(total)+"</b>";
+
+ const rows=[
+ ["Under Group 1",g1,
+  "Lower of:<br>1. G1 table ("+money(x["Group 1"])+") − G1 existing ("+money(s1)+") = "+money(g1a)+
+  "<br>2. G1 table ("+money(x["Group 1"])+") − combined existing ("+money(total)+") = "+money(g1b)],
+ ["Under Group 2",g2,
+  "Lower of:<br>1. G2 table ("+money(x["Group 2"])+") − G2 existing ("+money(s2)+") = "+money(g2a)+
+  "<br>2. G1 table ("+money(x["Group 1"])+") − combined existing ("+money(total)+") = "+money(g2b)],
+ ["Under Combined Groups",combined,
+  "Combined table ("+money(x["Combined"])+") − total existing ("+money(total)+")"],
+ ["Under Video Medical",video,
+  "Video Medical table ("+money(x["Video Medical"])+") − total existing ("+money(total)+")"]
+ ];
+
+ document.getElementById("rows").innerHTML=rows.map(q=>
+   "<tr><td><b>"+q[0]+"</b></td><td class='limit'>"+money(q[1])+
+   "</td><td class='formula'>"+q[2]+"</td></tr>"
+ ).join("");
+
+ r.style.display="block";
+}
+
+function resetAll(){
+ document.getElementById("cat").value="";
+ document.getElementById("age").value="";
+ document.getElementById("s1").value=0;
+ document.getElementById("s2").value=0;
+ document.getElementById("agehelp").textContent="Preferred / Special / General: 18–50 years.";
+ document.getElementById("err").style.display="none";
+ document.getElementById("results").style.display="none";
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>LIC Nav Jeevan Shree Custom Ledger Builder</title>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f4f7f9; margin: 0; padding: 20px; color: #333; }
+        .app-container { max-width: 1100px; background: white; margin: 0 auto; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .branding { text-align: center; border-bottom: 3px solid #00539C; padding-bottom: 15px; margin-bottom: 25px; }
+        .branding h1 { color: #00539C; margin: 0; font-size: 26px; }
+        .branding p { margin: 5px 0 0; color: #e67e22; font-weight: bold; }
+        .grid-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        label { font-weight: 600; display: block; margin-bottom: 5px; color: #444; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 15px; }
+        .manual-premium-box { background: #fff9e6; border: 1px solid #f39c12; padding: 15px; border-radius: 6px; grid-column: span 2; }
+        .rider-panel { background: #fdfefe; border: 1px solid #d6dbdf; padding: 20px; border-radius: 6px; margin-top: 15px; grid-column: span 2; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .rider-warning { grid-column: span 2; color: #d35400; background: #fff5e6; padding: 10px; border-left: 4px solid #e67e22; border-radius: 4px; font-size: 13px; font-weight: bold; display: none; }
+        .btn-calc { width: 100%; background: #00539C; color: white; border: none; padding: 14px; margin-top: 25px; font-size: 16px; font-weight: bold; border-radius: 6px; cursor: pointer; }
+        .btn-calc:hover { background: #003f77; }
+        .presentation-output { margin-top: 30px; display: none; }
+        .summary-cards { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 15px; margin-bottom: 25px; }
+        .card { background: #eef7ff; border-left: 6px solid #00539C; padding: 15px; border-radius: 6px; }
+        .card.premium-card { background: #fffcf0; border-left-color: #f1c40f; }
+        .card.total-prem-card { background: #fef5e7; border-left-color: #e67e22; }
+        .card.ga-card { background: #f0fff4; border-left-color: #2ecc71; }
+        .card h3 { margin-top: 0; color: #333; font-size: 13px; }
+        .highlight { font-size: 18px; font-weight: bold; color: #00539C; display: block; margin-top: 5px; }
+        .chart-wrapper { margin: 30px 0; background: #fff; padding: 15px; border: 1px solid #e2e8f0; border-radius: 8px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; background: white; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: center; font-size: 13px; }
+        th { background-color: #00539C; color: white; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <div class="branding">
+        <h1>LIC's Nav Jeevan Shree (Plan 912)</h1>
+        <p>Custom Presentation Ledger (Manual Premium Input Mode)</p>
+    </div>
+
+    <div class="grid-inputs">
+        <div>
+            <label for="clientAge">Age of Proposer (Years):</label>
+            <input type="number" id="clientAge" value="30" min="0" max="60" oninput="checkRiderEligibility()">
+        </div>
+        <div>
+            <label for="sumAssured">Basic Sum Assured (₹):</label>
+            <input type="number" id="sumAssured" value="500000" min="500000" step="50000" oninput="updateRiderLimits(); updateGaNotice();">
+        </div>
+        <div>
+            <label for="policyTerm">Policy Term (10 to 20 Years):</label>
+            <input type="number" id="policyTerm" value="15" min="10" max="20" oninput="updateTermRules();">
+        </div>
+        <div>
+            <label for="ppt">Premium Payment Term (PPT):</label>
+            <select id="ppt" onchange="updateGaNotice()"></select>
+        </div>
+
+        <div>
+            <label for="isExistingPolicyholder">Is Proposal from Existing Policyholder / Nominee?</label>
+            <select id="isExistingPolicyholder" onchange="updateGaNotice()">
+                <option value="NO">NO</option>
+                <option value="YES">YES</option>
+            </select>
+        </div>
+
+        <div>
+            <label for="coverOption">Death Benefit Choice:</label>
+            <select id="coverOption">
+                <option value="1">Option I: 7 Times of Annualized Premium Cover</option>
+                <option value="2">Option II: 10 Times of Annualized Premium Cover</option>
+            </select>
+        </div>
+        
+        <div class="manual-premium-box">
+            <label for="manualPremium" style="color: #b7791f;">Key-in Exact Base Annualized Premium from Rate Chart (₹):</label>
+            <input type="number" id="manualPremium" value="25000" min="1">
+            <small id="gaNotice" style="color: #718096; display:block; margin-top: 5px; font-weight: 600;"></small>
+        </div>
+
+        <div class="rider-panel">
+            <div class="rider-warning" id="riderNotice">
+                ⚠️ Note: ADDB and Term Riders are not available for Entry Ages up to 17 Years.
+            </div>
+            <div>
+                <label for="riderAddbSa">ADDB Rider Sum Assured (₹):</label>
+                <input type="number" id="riderAddbSa" value="500000" min="0" step="50000">
+                <small id="addbLimitNotice" style="color: #718096; display:block; margin-top: 3px; font-size: 11px;"></small>
+            </div>
+            <div>
+                <label for="riderTermSa">Term Assurance Rider SA (₹):</label>
+                <input type="number" id="riderTermSa" value="0" min="0" step="50000">
+                <small id="termLimitNotice" style="color: #718096; display:block; margin-top: 3px; font-size: 11px;"></small>
+            </div>
+        </div>
+    </div>
+
+    <button class="btn-calc" onclick="generatePresentation()">Generate Custom Presentation Grid</button>
+
+    <div id="presentationOutput" class="presentation-output">
+        <div class="summary-cards">
+            <div class="card premium-card">
+                <h3>Base Yearly Premium</h3>
+                <span class="highlight" id="lblPremium">₹0</span>
+            </div>
+            <div class="card total-prem-card">
+                <h3>Total Premium Payable</h3>
+                <span class="highlight" id="lblTotalPremiumPayable" style="color: #d35400;">₹0</span>
+            </div>
+            <div class="card ga-card">
+                <h3>Applicable Total GA Rate</h3>
+                <span class="highlight" id="lblGaRate" style="color: #27ae60;">0%</span>
+            </div>
+            <div class="card">
+                <h3>Guaranteed Maturity Payout</h3>
+                <span class="highlight" id="lblMaturity">₹0</span>
+            </div>
+        </div>
+
+        <!-- Dynamic Chart Canvas Container -->
+        <div class="chart-wrapper">
+            <canvas id="ledgerChart" height="100"></canvas>
+        </div>
+
+        <h3>📅 Benefit Ledger & Cashflow Timeline</h3>
+        <table id="cashflowTable">
+            <thead>
+                <tr>
+                    <th>Year</th>
+                    <th>Age</th>
+                    <th>Base Premium Paid</th>
+                    <th>Total Premiums Paid</th>
+                    <th>GA Accrued for Year</th>
+                    <th>Cumulative GA (Accrued Till Date)</th>
+                    <th>Natural Death Cover (Death SA + Cumulative GA + Term)</th>
+                    <th>Accidental Death Cover (Death SA + Cumulative GA + Term + ADDB)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Populated dynamically -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+let ledgerChartInstance = null;
+
+// Initialize form dynamically on page load
+window.onload = function() {
+    updateTermRules();
+    updateRiderLimits();
+    checkRiderEligibility();
+};
+
+function getBaseGaRate(term) {
+    if (term >= 10 && term <= 13) return 0.085; // 8.5%
+    if (term >= 14 && term <= 17) return 0.090; // 9.0%
+    if (term >= 18 && term <= 20) return 0.095; // 9.5%
+    return 0;
+}
+
+// Incentive 1: High Sum Assured GA Rate Addition (% of Tabular Annual Premiums)
+function getHighSaGaIncentive(sa, ppt) {
+    if (sa < 700000) return 0;
+
+    if (sa >= 700000 && sa < 1000000) {
+        if (ppt === 6) return 0.0007;  // 0.07%
+        if (ppt === 8) return 0.0010;  // 0.10%
+        if (ppt === 10) return 0.0012; // 0.12%
+        if (ppt === 12 || ppt === 15) return 0.0015; // 0.15%
+    } else if (sa >= 1000000 && sa < 1500000) {
+        if (ppt === 6) return 0.0008;  // 0.08%
+        if (ppt === 8) return 0.0012;  // 0.12%
+        if (ppt === 10) return 0.0015; // 0.15%
+        if (ppt === 12) return 0.0020; // 0.20%
+        if (ppt === 15) return 0.0025; // 0.25%
+    } else if (sa >= 1500000 && sa < 2000000) {
+        if (ppt === 6) return 0.0010;  // 0.10%
+        if (ppt === 8) return 0.0020;  // 0.20%
+        if (ppt === 10) return 0.0025; // 0.25%
+        if (ppt === 12) return 0.0030; // 0.30%
+        if (ppt === 15) return 0.0035; // 0.35%
+    } else if (sa >= 2000000) {
+        if (ppt === 6) return 0.0012;  // 0.12%
+        if (ppt === 8) return 0.0025;  // 0.25%
+        if (ppt === 10) return 0.0030; // 0.30%
+        if (ppt === 12) return 0.0035; // 0.35%
+        if (ppt === 15) return 0.0040; // 0.40%
+    }
+    return 0;
+}
+
+// Incentive 2: Existing Policyholder / Nominee Incentive Rate (% of Tabular Annual Premiums)
+function getPolicyholderIncentiveRate(isPolicyholder, ppt) {
+    if (isPolicyholder !== 'YES') return 0;
+
+    if (ppt === 6) return 0.0005;  // 0.05%
+    if (ppt === 8) return 0.0010;  // 0.10%
+    if (ppt === 10) return 0.0012; // 0.12%
+    if (ppt === 12 || ppt === 15) return 0.0015; // 0.15%
+    
+    return 0;
+}
+
+function calculateTotalGaRate() {
+    const term = parseInt(document.getElementById('policyTerm').value) || 0;
+    const sa = parseInt(document.getElementById('sumAssured').value) || 0;
+    const ppt = parseInt(document.getElementById('ppt').value) || 0;
+    const isPolicyholder = document.getElementById('isExistingPolicyholder').value;
+
+    const baseRate = getBaseGaRate(term);
+    const highSaIncentive = getHighSaGaIncentive(sa, ppt);
+    const policyholderIncentive = getPolicyholderIncentiveRate(isPolicyholder, ppt);
+
+    return baseRate + highSaIncentive + policyholderIncentive;
+}
+
+function updateGaNotice() {
+    const term = parseInt(document.getElementById('policyTerm').value) || 0;
+    const sa = parseInt(document.getElementById('sumAssured').value) || 0;
+    const ppt = parseInt(document.getElementById('ppt').value) || 0;
+    const isPolicyholder = document.getElementById('isExistingPolicyholder').value;
+
+    const baseRate = getBaseGaRate(term);
+    const highSaRate = getHighSaGaIncentive(sa, ppt);
+    const policyholderRate = getPolicyholderIncentiveRate(isPolicyholder, ppt);
+    const totalRate = baseRate + highSaRate + policyholderRate;
+
+    const gaNotice = document.getElementById('gaNotice');
+    if (baseRate > 0) {
+        gaNotice.innerText = `* Total GA Rate: ${(totalRate * 100).toFixed(3)}% (Base: ${(baseRate * 100).toFixed(1)}% | High SA Bonus: ${(highSaRate * 100).toFixed(2)}% | Existing Holder Bonus: ${(policyholderRate * 100).toFixed(2)}%)`;
+    } else {
+        gaNotice.innerText = `* Enter a valid policy term between 10 and 20 years.`;
+    }
+}
+
+function updateTermRules() {
+    const term = parseInt(document.getElementById('policyTerm').value) || 0;
+    const pptSelect = document.getElementById('ppt');
+
+    let availablePPTs = [];
+    if (term >= 10 && term <= 14) {
+        availablePPTs = [6];
+    } else if (term === 15) {
+        availablePPTs = [6, 8, 10];
+    } else if (term === 16 || term === 17) {
+        availablePPTs = [6, 8, 10, 12];
+    } else if (term >= 18 && term <= 20) {
+        availablePPTs = [6, 8, 10, 12, 15];
+    }
+
+    const currentPptVal = parseInt(pptSelect.value);
+    pptSelect.innerHTML = '';
+    availablePPTs.forEach(ppt => {
+        const option = document.createElement('option');
+        option.value = ppt;
+        option.text = ppt + " Years";
+        if (ppt === currentPptVal) option.selected = true;
+        pptSelect.appendChild(option);
+    });
+
+    updateGaNotice();
+}
+
+function updateRiderLimits() {
+    const sa = parseInt(document.getElementById('sumAssured').value) || 0;
+    const addbInput = document.getElementById('riderAddbSa');
+    const termInput = document.getElementById('riderTermSa');
+    
+    // ADDB Limit: Lower of Basic SA or 1 Crore (1,00,00,000)
+    const maxAddb = Math.min(sa, 10000000);
+    addbInput.max = maxAddb;
+    document.getElementById('addbLimitNotice').innerText = `Max allowed: ₹${maxAddb.toLocaleString('en-IN')}`;
+
+    // Term Rider Limit: Lower of Basic SA or 25 Lakhs (25,00,000)
+    const maxTerm = Math.min(sa, 2500000);
+    termInput.max = maxTerm;
+    document.getElementById('termLimitNotice').innerText = `Max allowed: ₹${maxTerm.toLocaleString('en-IN')}`;
+}
+
+function checkRiderEligibility() {
+    const age = parseInt(document.getElementById('clientAge').value) || 0;
+    const addbInput = document.getElementById('riderAddbSa');
+    const termInput = document.getElementById('riderTermSa');
+    const notice = document.getElementById('riderNotice');
+
+    if (age <= 17) {
+        addbInput.value = 0;
+        termInput.value = 0;
+        addbInput.disabled = true;
+        termInput.disabled = true;
+        notice.style.display = 'block';
+    } else {
+        addbInput.disabled = false;
+        termInput.disabled = false;
+        notice.style.display = 'none';
+        updateRiderLimits();
+    }
+}
+
+function generatePresentation() {
+    const age = parseInt(document.getElementById('clientAge').value);
+    const sa = parseInt(document.getElementById('sumAssured').value);
+    const term = parseInt(document.getElementById('policyTerm').value);
+    const ppt = parseInt(document.getElementById('ppt').value);
+    const option = parseInt(document.getElementById('coverOption').value);
+    const basePremiumInput = parseFloat(document.getElementById('manualPremium').value) || 0;
+
+    if (isNaN(term) || term < 10 || term > 20) {
+        alert("Policy Term must be between 10 and 20 years.");
+        return;
+    }
+    if (age + term < 18) {
+        alert("Invalid Selection: Minimum age at maturity must be at least 18 years. (Current: " + (age + term) + " years)");
+        return;
+    }
+    if (sa < 500000) {
+        alert("Minimum Sum Assured for Nav Jeevan Shree is ₹5,00,000.");
+        return;
+    }
+    if (basePremiumInput <= 0) {
+        alert("Please key in a valid base annualized premium value.");
+        return;
+    }
+
+    // Evaluate rider choices against caps
+    let rawAddb = parseInt(document.getElementById('riderAddbSa').value) || 0;
+    let rawTerm = parseInt(document.getElementById('riderTermSa').value) || 0;
+
+    const maxAllowedAddb = Math.min(sa, 10000000);
+    const maxAllowedTerm = Math.min(sa, 2500000);
+
+    let abRiderSa = age <= 17 ? 0 : Math.min(rawAddb, maxAllowedAddb);
+    let termRiderSa = age <= 17 ? 0 : Math.min(rawTerm, maxAllowedTerm);
+
+    if (age > 17) {
+        document.getElementById('riderAddbSa').value = abRiderSa;
+        document.getElementById('riderTermSa').value = termRiderSa;
+    }
+
+    const totalGaRate = calculateTotalGaRate();
+    const totalPremiumsPayable = basePremiumInput * ppt;
+
+    // Death Cover Sum Assured = Higher of Basic Sum Assured OR (7x / 10x Annualized Premium)
+    const multiple = option === 1 ? 7 : 10;
+    const premiumMultipleCover = basePremiumInput * multiple;
+    const deathSumAssured = Math.max(sa, premiumMultipleCover);
+
+    document.getElementById('lblPremium').innerText = "₹" + Math.round(basePremiumInput).toLocaleString('en-IN');
+    document.getElementById('lblTotalPremiumPayable').innerText = "₹" + Math.round(totalPremiumsPayable).toLocaleString('en-IN');
+    document.getElementById('lblGaRate').innerText = (totalGaRate * 100).toFixed(3) + "% p.a.";
+
+    const tbody = document.querySelector('#cashflowTable tbody');
+    tbody.innerHTML = '';
+
+    let cumulativePremium = 0;
+    let cumulativeGA = 0;
+
+    let chartLabels = [];
+    let chartPremiums = [];
+    let chartGA = [];
+    let chartSumAssured = [];
+
+    for (let i = 1; i <= term; i++) {
+        const currentAge = age + i - 1;
+        const premiumPaidThisYear = (i <= ppt) ? basePremiumInput : 0;
+        cumulativePremium += premiumPaidThisYear;
+
+        // Yearly GA = Total GA Rate * Cumulative Premiums Paid Up To That Year
+        const currentYearGA = totalGaRate * cumulativePremium;
+        cumulativeGA += currentYearGA;
+
+        // Natural Death Cover = Death Sum Assured + Cumulative GA accrued till year + Term Rider SA
+        let naturalDeathBenefit = deathSumAssured + cumulativeGA + termRiderSa;
+        
+        // Accidental Death Cover = Natural Death Benefit + ADDB Rider SA
+        let accidentalDeathBenefit = naturalDeathBenefit + abRiderSa;
+
+        chartLabels.push("Yr " + i + " (" + currentAge + ")");
+        chartPremiums.push(cumulativePremium);
+        chartGA.push(cumulativeGA);
+        chartSumAssured.push(sa);
+
+        const row = `<tr>
+            <td>${i}</td>
+            <td>${currentAge}</td>
+            <td>₹${Math.round(premiumPaidThisYear).toLocaleString('en-IN')}</td>
+            <td>₹${Math.round(cumulativePremium).toLocaleString('en-IN')}</td>
+            <td>₹${Math.round(currentYearGA).toLocaleString('en-IN')}</td>
+            <td>₹${Math.round(cumulativeGA).toLocaleString('en-IN')}</td>
+            <td>₹${Math.round(naturalDeathBenefit).toLocaleString('en-IN')}</td>
+            <td>₹${Math.round(accidentalDeathBenefit).toLocaleString('en-IN')}</td>
+        </tr>`;
+        tbody.innerHTML += row;
+    }
+
+    // Maturity Benefit = Basic Sum Assured + Total Cumulative GA at end of Policy Term
+    const finalMaturity = sa + cumulativeGA;
+    document.getElementById('lblMaturity').innerText = "₹" + Math.round(finalMaturity).toLocaleString('en-IN');
+
+    document.getElementById('presentationOutput').style.display = 'block';
+
+    renderChart(chartLabels, chartPremiums, chartGA, chartSumAssured);
+}
+
+function renderChart(labels, premiumData, gaData, saData) {
+    const ctx = document.getElementById('ledgerChart').getContext('2d');
+    
+    if (ledgerChartInstance) {
+        ledgerChartInstance.destroy();
+    }
+
+    ledgerChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Cumulative Premiums Paid',
+                    data: premiumData,
+                    backgroundColor: '#f1c40f'
+                },
+                {
+                    label: 'Cumulative GA Accrued',
+                    data: gaData,
+                    backgroundColor: '#2ecc71'
+                },
+                {
+                    label: 'Basic Sum Assured',
+                    data: saData,
+                    backgroundColor: '#00539C'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Cumulative Growth & Benefits Projection Over Policy Term',
+                    font: { size: 16 }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.dataset.label + ': ₹' + Math.round(context.raw).toLocaleString('en-IN');
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: { stacked: true },
+                y: { 
+                    stacked: true,
+                    ticks: {
+                        callback: function(value) {
+                            return '₹' + value.toLocaleString('en-IN');
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+</script>
+</body>
+</html>
