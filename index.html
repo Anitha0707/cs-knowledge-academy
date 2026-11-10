@@ -363,6 +363,7 @@ textarea.txt{min-height:120px;resize:vertical}
 }
 /* keep the top menu inside the screen on laptops (1280px and below) */
 @media (max-width:1400px){.sidebar .nav{min-width:0;max-width:100%}.sidebar .nav a{padding:8px 7px;gap:5px;font-size:12.5px}.sidebar .nav .navlock{margin-left:0}}
+@media (min-width:1101px) and (max-width:1340px){.sidebar .nav a{padding:8px 5px;gap:4px;font-size:12px}}
 .sidebar{min-width:0}.sidebar .nav{overflow-x:auto;overflow-y:hidden;scrollbar-width:none;padding-bottom:6px}.sidebar .nav::-webkit-scrollbar{display:none}
 /* centre the page title and sub-title at the top of every section */
 .topbar .grow{text-align:center}
@@ -556,7 +557,7 @@ const hasCrypto=()=>!!(window.crypto&&crypto.subtle);
 let DATA=clone(CSK_DATA), DIRTY=false;
 const _draft=store.get("csk_draft",null);
 if(_draft&&_draft.data&&_draft.savedAt>(CSK_DATA.updated||0)){DATA=_draft.data;DIRTY=true}
-["sessions","presentations","apps","upcoming"].forEach(k=>{if(!Array.isArray(DATA[k]))DATA[k]=[]});
+["sessions","presentations","apps","quizzes","upcoming"].forEach(k=>{if(!Array.isArray(DATA[k]))DATA[k]=[]});
 DATA.settings=Object.assign({whatsapp:"",email:"",youtube:"",phones:[],adminHash:""},DATA.settings||{});
 const UNLOCK={};                      // ongoing session id -> {rec:[...], pw}
 let ADMIN=sess.get("csk_admin")==="1";
@@ -620,6 +621,7 @@ const IC={
   download:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/>',
   external:'<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6M10 14L21 3"/>',
   play:'<path d="M8 5v14l11-7z" fill="currentColor"/>',
+  quiz:'<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>',
   award:'<circle cx="12" cy="8" r="6"/><path d="M15.5 13.5L17 22l-5-3-5 3 1.5-8.5"/>',
   hammer:'<path d="M14 6l4 4M3 21l9-9M12 12l5-5 4 4-5 5z"/><path d="M15 3l6 6"/>',
   anchor:'<circle cx="12" cy="5" r="3"/><path d="M12 22V8M5 12H2a10 10 0 0 0 20 0h-3"/>',
@@ -640,13 +642,14 @@ const ROUTES={
   videos:{t:"Video Recordings",s:"Recordings of completed sessions – password required",icon:"video"},
   audios:{t:"Audio Recordings",s:"Audio of completed sessions – password required",icon:"audio"},
   presentations:{t:"Presentations",s:"View presentations and download them as PDF – password required",icon:"slides"},
+  quiz:{t:"Quiz",s:"Practice quizzes on life insurance, riders and underwriting – password required",icon:"quiz"},
   apps:{t:"Web Applications",s:"Useful tools and calculators – password required",icon:"apps"},
   founder:{t:"Our Founder",s:"The person behind CS Knowledge Academy",icon:"founder"},
   feedback:{t:"Feedback",s:"Send us your thoughts on WhatsApp or by mail",icon:"feedback"},
   admin:{t:"Admin",s:"Add and update the content of this website",icon:"award"}
 };
-const GATE_HASH="45068bf490203fc549b75d4001ea309d6f3569dd7bb9f52316bda387e0b0de03", LOCKED=["videos","audios","presentations","apps"];
-const NAV=["home","founder","upcoming","ongoing","videos","audios","presentations","apps","feedback"];
+const GATE_HASH="45068bf490203fc549b75d4001ea309d6f3569dd7bb9f52316bda387e0b0de03", LOCKED=["videos","audios","presentations","quiz","apps"];
+const NAV=["home","founder","upcoming","ongoing","videos","audios","presentations","quiz","apps","feedback"];
 let current="home";
 $("#nav").innerHTML=NAV.map(r=>`<a href="#/${r}" data-route="${r}">${icon(ROUTES[r].icon)}<span>${ROUTES[r].t}</span>${LOCKED.includes(r)?`<span class="navlock" title="Password required">${icon("lock")}</span>`:""}</a>`).join("");
 
@@ -662,6 +665,7 @@ const SEO_PAGES={
   audios:["Audio Recordings – Tamil & English · CS Knowledge Academy","Audio recordings of CS Knowledge Academy life insurance classes in Tamil and English – listen on the go."],
   presentations:["Presentations · CS Knowledge Academy","Download and view presentations on LIC plans, riders, bonus and underwriting from CS Knowledge Academy, listed by release date."],
   apps:["Web Applications & Ready Reckoners · CS Knowledge Academy","Free LIC ready reckoners and calculators: SUC meter, SUC limit finder, Jeevan Utsav, Nav Jeevan Shree, Bima Lakshmi, Amritbaal, Bima Platinum and more."],
+  quiz:["Quiz – Life Insurance Practice Tests · CS Knowledge Academy","Practice quizzes on life insurance concepts, riders, plans, minor lives, special reports and non-medical underwriting from CS Knowledge Academy."],
   feedback:["Feedback & Contact · CS Knowledge Academy","Contact CS Knowledge Academy on WhatsApp, phone or email and share your feedback."]
 };
 function setMeta(sel,attr,val){const e=document.querySelector(sel);if(e)e.setAttribute(attr,val)}
@@ -857,7 +861,7 @@ VIEWS.home=el=>{
   ${ups.length?`<div class="section-h"><h3>Announcements</h3><a class="link" href="#/upcoming">All upcoming sessions →</a></div><div class="announce" style="margin-bottom:26px">${ups.map(u=>upcomingCard(u,true)).join("")}</div>`:""}
   <div class="section-h"><h3>Explore</h3></div>
   <div class="tiles">
-    ${[["ongoing","Ongoing Sessions","Running now · password needed"],["videos","Video Recordings","Watch completed sessions · password"],["audios","Audio Recordings","Listen on the go · password"],["presentations","Presentations","View and download PPTs · password"],["apps","Web Applications","Handy tools and calculators · password"],["upcoming","Upcoming Sessions","Posters and dates"]]
+    ${[["ongoing","Ongoing Sessions","Running now · password needed"],["videos","Video Recordings","Watch completed sessions · password"],["audios","Audio Recordings","Listen on the go · password"],["presentations","Presentations","View and download PPTs · password"],["quiz","Quiz","Practice tests on concepts and underwriting · password"],["apps","Web Applications","Handy tools and calculators · password"],["upcoming","Upcoming Sessions","Posters and dates"]]
       .map(([r,t,s])=>`<a class="tile" href="#/${r}"><div class="ic">${icon(ROUTES[r].icon)}</div><div><b>${t}</b><span>${s}</span></div></a>`).join("")}
   </div>
   <div class="section-h"><h3>Contact us</h3></div>
@@ -956,6 +960,20 @@ VIEWS.presentations=el=>{
   $("#q",el).oninput=draw;$("#sort",el).onchange=draw;draw();
 };
 
+VIEWS.quiz=el=>{
+  const list=DATA.quizzes;
+  if(!list.length){el.innerHTML=`<div class="empty"><h3 class="serif">Quizzes coming soon</h3><p>Practice quizzes will be listed here.</p></div>`;return}
+  el.innerHTML=`<div class="toolbar"><input class="txt" id="q" type="search" placeholder="Search quizzes by name or number…" aria-label="Search quizzes"></div><div id="out"></div>`;
+  const card=a=>`<div class="app"><h3>${a.no?`<span class="tag">Quiz ${esc(a.no)}</span><br>`:""}${esc(a.title)}</h3><p>${esc(a.desc||"")}</p>${safeUrl(a.url)?`<a class="btn btn-gold" href="${esc(a.url)}" target="_blank" rel="noopener noreferrer">${/^apps\//i.test(a.url)?"Open tool":"Start quiz"} ${icon("external","style='width:16px;height:16px'")}</a>`:""}</div>`;
+  const draw=()=>{
+    const q=norm($("#q",el).value.trim());
+    const rows=list.filter(a=>!q||norm(`${a.no||""} quiz ${a.title} ${a.desc||""} ${a.group||""}`).includes(q));
+    const groups=[];rows.forEach(a=>{const g=a.group||"";let x=groups.find(y=>y.g===g);if(!x){x={g,items:[]};groups.push(x)}x.items.push(a)});
+    $("#out",el).innerHTML=groups.length?groups.map(x=>`${x.g?`<div class="section-h"><h3>${esc(x.g)}</h3></div>`:""}<div class="apps" style="margin-bottom:26px">${x.items.map(card).join("")}</div>`).join(""):`<div class="empty"><h3 class="serif">Nothing found</h3><p>Try a different word.</p></div>`;
+  };
+  $("#q",el).oninput=draw;draw();
+};
+
 VIEWS.apps=el=>{
   const card=a=>`<div class="app"><h3>${esc(a.title)}</h3><p>${esc(a.desc||"")}</p>${safeUrl(a.url)?`<a class="btn btn-gold" href="${esc(a.url)}" target="_blank" rel="noopener noreferrer">Open ${icon("external","style='width:16px;height:16px'")}</a>`:""}</div>`;
   if(!DATA.apps.length){el.innerHTML=`<div class="empty"><h3 class="serif">Web applications coming soon</h3><p>Handy tools and calculators will be listed here.</p></div>`;return}
@@ -997,14 +1015,14 @@ VIEWS.feedback=el=>{
 
 /* ----------------------------- ADMIN ----------------------------- */
 const AS={tab:"sessions",sess:null};
-const T_={sessions:"Sessions & Recordings",presentations:"Presentations",apps:"Web Applications",upcoming:"Upcoming Sessions",settings:"Settings"};
+const T_={sessions:"Sessions & Recordings",presentations:"Presentations",quiz:"Quiz",apps:"Web Applications",upcoming:"Upcoming Sessions",settings:"Settings"};
 VIEWS.admin=el=>{
   el.innerHTML=`${DIRTY?`<div class="banner"><div class="grow"><b>You have unpublished changes.</b><br>Visitors will see them only after you download <b>data.js</b> and upload it to your website (replace the old data.js).</div><button class="btn btn-gold" id="dl">${icon("download")} Download data.js</button><button class="btn btn-danger btn-sm" id="disc">Discard my changes</button></div>`:`<div class="help"><b>How it works:</b> add or edit items below. When you are done, press <b>Download data.js</b> and upload that file to your website, replacing the old data.js. Until then only you can see your changes.</div><div style="margin-bottom:16px"><button class="btn btn-ghost" id="dl">${icon("download")} Download data.js</button></div>`}
     <div class="tabs">${Object.keys(T_).map(k=>`<button class="tab ${AS.tab===k?"on":""}" data-tab="${k}">${T_[k]}</button>`).join("")}</div><div id="aBody"></div>`;
   $("#dl",el).onclick=downloadData;
   const d=$("#disc",el);if(d)d.onclick=()=>{if(confirm("Discard all unpublished changes and go back to the published content?")){store.del("csk_draft");location.reload()}};
   $$("[data-tab]",el).forEach(b=>b.onclick=()=>{AS.tab=b.dataset.tab;AS.sess=null;rerender()});
-  const body=$("#aBody",el);({sessions:adminSessions,presentations:adminPpts,apps:adminApps,upcoming:adminUpcoming,settings:adminSettings})[AS.tab](body);
+  const body=$("#aBody",el);({sessions:adminSessions,presentations:adminPpts,quiz:adminQuiz,apps:adminApps,upcoming:adminUpcoming,settings:adminSettings})[AS.tab](body);
 };
 const listRow=(title,sub,acts)=>`<div class="arow"><div class="mid"><b>${title}</b><small>${sub}</small></div><div class="acts">${acts}</div></div>`;
 const aBtn=(a,id,label,cls="btn-ghost")=>`<button class="btn ${cls} btn-sm" data-a="${a}" data-id="${esc(id)}">${label}</button>`;
@@ -1030,6 +1048,15 @@ function adminApps(body){
     add:()=>showForm({title:"Add web application",fields:appFields,onSubmit:async v=>{DATA.apps.push({id:uid("a"),...v});await commit()}}),
     edit:id=>{const a=DATA.apps.find(x=>x.id===id);showForm({title:"Edit web application",fields:appFields,values:a,onSubmit:async v=>{Object.assign(a,v);await commit()}})},
     del:async id=>{if(confirm("Delete this web application?")){DATA.apps=DATA.apps.filter(x=>x.id!==id);await commit()}}});
+}
+/* --- quiz --- */
+const quizFields=[{k:"group",label:"Group (optional)",ph:"e.g. Quizzes (Google Forms)"},{k:"no",label:"Quiz number (optional)",ph:"e.g. 27"},{k:"title",label:"Quiz name",req:1},{k:"desc",label:"Short note (optional)",type:"textarea",rows:2},{k:"url",label:"Link",type:"url",req:1}];
+function adminQuiz(body){
+  body.innerHTML=`<div style="margin-bottom:14px"><button class="btn btn-gold" data-a="add">+ Add quiz</button></div>${DATA.quizzes.map(a=>listRow((a.no?esc(a.no)+". ":"")+esc(a.title),esc(a.url),aBtn("edit",a.id,"Edit")+aBtn("del",a.id,"Delete","btn-danger"))).join("")||'<div class="empty">No quizzes yet.</div>'}`;
+  bind(body,{
+    add:()=>showForm({title:"Add quiz",fields:quizFields,onSubmit:async v=>{DATA.quizzes.push({id:uid("q"),...v});await commit()}}),
+    edit:id=>{const a=DATA.quizzes.find(x=>x.id===id);showForm({title:"Edit quiz",fields:quizFields,values:a,onSubmit:async v=>{Object.assign(a,v);await commit()}})},
+    del:async id=>{if(confirm("Delete this quiz?")){DATA.quizzes=DATA.quizzes.filter(x=>x.id!==id);await commit()}}});
 }
 /* --- upcoming --- */
 const upFields=[{k:"title",label:"Title",req:1},{k:"startDate",label:"Starting date",type:"date"},{k:"lang",label:"Session language (decides which section it appears in)",type:"select",opts:[{v:"tamil",l:"Tamil"},{v:"english",l:"English"}]},{k:"schedule",label:"Timings / duration / mode",ph:"e.g. Mon–Fri · 8:00 PM to 9:30 PM · Zoom"},
