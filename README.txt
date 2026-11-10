@@ -4,9 +4,10 @@ index.html   the website (open with Live Server in VS Code)
 data.js      all the content (recordings, presentations, announcements, settings)
 assets/      the logo and browser-tab icon (favicon)
 apps/        the ready-reckoner web apps (linked from "Web Applications")
+presentations/  PDF files of presentations (linked from data.js, shown under "Presentations")
 .vscode/     Live Server port setting (5501)
 
-To publish: upload index.html, data.js and the apps folder together to your host.
+To publish: upload index.html, data.js, the apps folder and the presentations folder together to your host.
 
 Tip: to make the Subscribe pop-up open your channel directly, open Admin > Settings
 and paste your YouTube channel link, then upload the new data.js.

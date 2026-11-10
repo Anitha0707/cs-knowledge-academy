@@ -513,7 +513,7 @@ const MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","De
 const parts=iso=>{const m=/^(\d{4})-(\d{2})-(\d{2})/.exec(iso||"");return m?{y:+m[1],m:+m[2],d:+m[3]}:null};
 const fmtDate=iso=>{const p=parts(iso);return p?`${String(p.d).padStart(2,"0")} ${MON[p.m-1]} ${p.y}`:""};
 const fmtRange=(a,b)=>a&&b?`${fmtDate(a)} – ${fmtDate(b)}`:(fmtDate(a)||fmtDate(b));
-const safeUrl=u=>(/^https?:\/\//i.test(u||"")||/^apps\/[\w.\-]+\.html$/i.test(u||""))?u:"";
+const safeUrl=u=>(/^https?:\/\//i.test(u||"")||/^apps\/[\w.\-]+\.html$/i.test(u||"")||/^presentations\/[\w.\-]+\.pdf$/i.test(u||""))?u:"";
 const uid=p=>p+Math.random().toString(36).slice(2,8);
 const ytId=u=>{const m=(u||"").match(/(?:youtu\.be\/|youtube\.com\/(?:live\/|embed\/|shorts\/)|[?&]v=)([\w-]{11})/);return m?m[1]:null};
 const driveId=u=>{const m=(u||"").match(/\/d\/([\w-]+)/);return m?m[1]:null};
@@ -557,7 +557,7 @@ const hasCrypto=()=>!!(window.crypto&&crypto.subtle);
 let DATA=clone(CSK_DATA), DIRTY=false;
 const _draft=store.get("csk_draft",null);
 if(_draft&&_draft.data&&_draft.savedAt>(CSK_DATA.updated||0)){DATA=_draft.data;DIRTY=true}
-["sessions","presentations","apps","quizzes","upcoming"].forEach(k=>{if(!Array.isArray(DATA[k]))DATA[k]=[]});
+["sessions","presentations","apps","quizzes","upcoming","ongoing"].forEach(k=>{if(!Array.isArray(DATA[k]))DATA[k]=[]});
 DATA.settings=Object.assign({whatsapp:"",email:"",youtube:"",phones:[],adminHash:""},DATA.settings||{});
 const UNLOCK={};                      // ongoing session id -> {rec:[...], pw}
 let ADMIN=sess.get("csk_admin")==="1";
@@ -727,7 +727,7 @@ const iframe=(src,t)=>`<iframe src="${esc(src)}" title="${esc(t)}" allow="autopl
 function playRec(r){   // audio recordings play inside the site (videos open directly on YouTube)
   openModal({kind:"Audio recording",title:`${fmtDate(r.date)} – ${r.title}`,cls:"audio",body:iframe(`https://drive.google.com/file/d/${driveId(r.audio)}/preview`,r.title),openUrl:safeUrl(r.audio),note:"Press play in the player above."});
 }
-function viewPoster(u){const x=DATA.upcoming.find(q=>q.id===u);if(!x||!x.poster)return;openModal({kind:"Poster",title:x.title,cls:"img",body:`<img src="${esc(x.poster)}" alt="${esc(x.title)}">`,openUrl:"",note:""})}
+function viewPoster(u){const x=DATA.upcoming.find(q=>q.id===u)||DATA.ongoing.find(q=>q.id===u);if(!x||!x.poster)return;openModal({kind:"Poster",title:x.title,cls:"img",body:`<img src="${esc(x.poster)}" alt="${esc(x.title)}">`,openUrl:"",note:""})}
 function viewPpt(id){const p=DATA.presentations.find(x=>x.id===id);if(!p)return;const L=pptLinks(p);
   openModal({kind:"Presentation · "+fmtDate(p.date),title:p.title,body:iframe(L.view,p.title),openUrl:safeUrl(L.open),dlUrl:safeUrl(L.dl),dlLabel:"Download PDF",note:"Use Download PDF to save this presentation as a PDF."})}
 document.addEventListener("click",e=>{
@@ -892,6 +892,19 @@ VIEWS.upcoming=el=>{
   $$(".poster",el).forEach(p=>p.onkeydown=e=>{if(e.key==="Enter")viewPoster(p.dataset.poster)});
 };
 
+function ongoingCard(u){
+  const hasP=!!u.poster;
+  return `<article class="ucard ${hasP?"":"noposter"}">
+    ${hasP?`<div class="poster" data-poster="${esc(u.id)}" role="button" tabindex="0" aria-label="View poster"><img src="${esc(u.poster)}" alt="Poster: ${esc(u.title)}" loading="lazy"><span>Click to enlarge</span></div>`:""}
+    <div class="body">
+      <div class="when">${u.startDate?`<span class="date">${fmtRange(u.startDate,u.endDate||u.startDate)}</span>`:""}<span class="tag">Ongoing</span></div>
+      <h3>${esc(u.title)}</h3>
+      ${u.schedule?`<div class="sched">${esc(u.schedule)}</div>`:""}
+      ${u.details?`<div class="det">${esc(u.details)}</div>`:""}
+      <div class="acts">${u.register&&waDigits()?`<a class="btn btn-wa" href="${waLink("Hello, I would like to register for: "+u.title)}" target="_blank" rel="noopener noreferrer">${WA_SVG} Register on WhatsApp</a>`:""}${hasP?`<button class="btn btn-ghost" data-poster="${esc(u.id)}">View poster</button>`:""}</div>
+    </div></article>`;
+}
+
 function recRow(r,kinds){
   const p=parts(r.date);
   return `<div class="rec"><div class="dbadge"><b>${p?String(p.d).padStart(2,"0"):"–"}</b><span>${p?MON[p.m-1]:""}</span></div>
@@ -926,9 +939,11 @@ function mediaView(kind){
 VIEWS.videos=mediaView("video");VIEWS.audios=mediaView("audio");
 
 VIEWS.ongoing=el=>{
-  const list=ongoingSessions();
+  const list=ongoingSessions(),posters=DATA.ongoing||[];
+  const postersHtml=posters.length?`<div class="announce" style="margin-bottom:30px">${posters.map(ongoingCard).join("")}</div>`:"";
+  if(!list.length&&posters.length){el.innerHTML=postersHtml;$$(".poster",el).forEach(p=>p.onkeydown=e=>{if(e.key==="Enter")viewPoster(p.dataset.poster)});return}
   if(!list.length){el.innerHTML=`<div class="empty"><h3 class="serif">No session is running right now</h3><p>When a session starts, its recordings will be available here with a password.</p><p style="margin-top:12px"><a class="btn btn-gold" href="#/upcoming">See upcoming sessions</a></p></div>`;return}
-  el.innerHTML=list.map(s=>{
+  el.innerHTML=postersHtml+list.map(s=>{
     const recs=UNLOCK[s.id]?UNLOCK[s.id].rec:null;
     return `<section class="lockcard" data-sid="${esc(s.id)}"><div class="head"><span class="tag">Ongoing</span><h3>${esc(s.title)}</h3><small style="color:var(--muted)">${fmtRange(s.from,s.to)}</small></div>
       ${s.note?`<p style="color:var(--muted);margin-bottom:14px">${esc(s.note)}</p>`:""}
@@ -937,6 +952,7 @@ VIEWS.ongoing=el=>{
         :(s.enc?`<div class="err" id="err_${esc(s.id)}" hidden></div><form data-unlock="${esc(s.id)}"><input class="txt" type="password" placeholder="Enter the session password" aria-label="Session password" required><button class="btn btn-gold" type="submit">${icon("lock")} Unlock</button></form><p style="color:var(--muted);font-size:13px;margin-top:10px">The password is shared with registered participants.</p>`
           :'<p style="color:var(--muted)">Recordings will be added soon.</p>')}</section>`;
   }).join("");
+  $$(".poster",el).forEach(p=>p.onkeydown=e=>{if(e.key==="Enter")viewPoster(p.dataset.poster)});
   $$("[data-unlock]",el).forEach(f=>f.onsubmit=async e=>{
     e.preventDefault();const s=DATA.sessions.find(x=>x.id===f.dataset.unlock),er=$("#err_"+s.id,el);
     if(!hasCrypto()){er.hidden=false;er.textContent="This page must be opened over https (or localhost) for the password lock to work.";return}
