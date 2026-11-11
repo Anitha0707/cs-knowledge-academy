@@ -1,15 +1,15 @@
 /* CS KNOWLEDGE ACADEMY – site content. Edit through the Admin page, then replace this file. */
 window.CSK_DATA = {
- "updated": 1794315099448,
+ "updated": 1794403249765,
  "settings": {
   "whatsapp": "919500076095",
   "email": "csridharanlic@gmail.com",
   "youtube": "",
-  "adminHash": "23c752d432e1de8304a9180f4437ab40e987978fd3f8fb5d74bcfdd50f10eb6c",
   "phones": [
    "+91 94433 11844",
    "+91 95000 76095"
-  ]
+  ],
+  "adminHash": "23c752d432e1de8304a9180f4437ab40e987978fd3f8fb5d74bcfdd50f10eb6c"
  },
  "sessions": [
   {
@@ -53,6 +53,15 @@ window.CSK_DATA = {
      "title": "Deepavali Greetings",
      "group": "Level 2",
      "video": "https://youtu.be/qdB3ZAQKoH8",
+     "audio": "",
+     "lang": "tamil"
+    },
+    {
+     "id": "r_l2n5",
+     "date": "2026-11-10",
+     "title": "Financial Planning by Sri M Karunanidhi, LUGI",
+     "group": "Level 2",
+     "video": "https://youtu.be/YiNlYVNCwbo",
      "audio": "",
      "lang": "tamil"
     }
@@ -639,14 +648,6 @@ window.CSK_DATA = {
  ],
  "presentations": [
   {
-   "id": "p1",
-   "title": "Jeevan Utsav",
-   "desc": "Presentation for the session on Jeevan Utsav.",
-   "date": "2026-09-28",
-   "link": "https://docs.google.com/presentation/d/1dzTMgB7E7QizbxIaw1xJ-nqnCDkY8Opk/edit?usp=sharing",
-   "download": ""
-  },
-  {
    "id": "p2",
    "title": "Nav Jeevan Shree",
    "desc": "Presentation for the session on Nav Jeevan Shree.",
@@ -660,14 +661,6 @@ window.CSK_DATA = {
    "desc": "Presentation for the session on Bima Lakshmi.",
    "date": "2026-09-30",
    "link": "https://docs.google.com/presentation/d/1fNDeWaanLwgYxdUuf9GjbCXgTCeo5Tpq/edit?usp=sharing",
-   "download": ""
-  },
-  {
-   "id": "p4",
-   "title": "Amrit Baal",
-   "desc": "Presentation for the session on Amrit Baal.",
-   "date": "2026-10-01",
-   "link": "https://docs.google.com/presentation/d/1H8W9xlaLGIwadPT3LInUPfEB5QuVC_e4/edit?usp=sharing",
    "download": ""
   },
   {
@@ -724,6 +717,46 @@ window.CSK_DATA = {
    "desc": "As per valuation as at 31.3.26. Presented by C. Sridharan.",
    "date": "2026-11-09",
    "link": "presentations/Bonus_as_a_Marketing_Tool_9.11.26.pdf",
+   "download": ""
+  },
+  {
+   "id": "p12",
+   "title": "Pension Plans",
+   "desc": "Training material for new agents on LIC pension plans. Presented by C. Sridharan.",
+   "date": "2026-11-09",
+   "link": "presentations/Pension_Plans_9.11.26.pdf",
+   "download": ""
+  },
+  {
+   "id": "p13",
+   "title": "Savings Plans",
+   "desc": "Training material for new agents on popular LIC savings plans. Presented by C. Sridharan.",
+   "date": "2026-11-09",
+   "link": "presentations/Savings_Plans_9.11.26.pdf",
+   "download": ""
+  },
+  {
+   "id": "p14",
+   "title": "Term Plans",
+   "desc": "LIC term plans, including Yuva Term. Presented by C. Sridharan.",
+   "date": "2026-11-09",
+   "link": "presentations/Term_Plans_9.11.26.pdf",
+   "download": ""
+  },
+  {
+   "id": "p15",
+   "title": "ULIP",
+   "desc": "Basics about ULIPs. Presented by C. Sridharan.",
+   "date": "2026-11-09",
+   "link": "presentations/ULIP_9.11.26.pdf",
+   "download": ""
+  },
+  {
+   "id": "p16",
+   "title": "Underwriting (Simple)",
+   "desc": "Basic underwriting rules and concepts. Presented by C. Sridharan.",
+   "date": "2026-11-09",
+   "link": "presentations/Underwriting_Simple_9.11.26.pdf",
    "download": ""
   }
  ],

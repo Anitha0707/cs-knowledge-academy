@@ -1034,8 +1034,9 @@ const AS={tab:"sessions",sess:null};
 const T_={sessions:"Sessions & Recordings",presentations:"Presentations",quiz:"Quiz",apps:"Web Applications",upcoming:"Upcoming Sessions",settings:"Settings"};
 VIEWS.admin=el=>{
   el.innerHTML=`${DIRTY?`<div class="banner"><div class="grow"><b>You have unpublished changes.</b><br>Visitors will see them only after you download <b>data.js</b> and upload it to your website (replace the old data.js).</div><button class="btn btn-gold" id="dl">${icon("download")} Download data.js</button><button class="btn btn-danger btn-sm" id="disc">Discard my changes</button></div>`:`<div class="help"><b>How it works:</b> add or edit items below. When you are done, press <b>Download data.js</b> and upload that file to your website, replacing the old data.js. Until then only you can see your changes.</div><div style="margin-bottom:16px"><button class="btn btn-ghost" id="dl">${icon("download")} Download data.js</button></div>`}
+    <div id="qa"></div>
     <div class="tabs">${Object.keys(T_).map(k=>`<button class="tab ${AS.tab===k?"on":""}" data-tab="${k}">${T_[k]}</button>`).join("")}</div><div id="aBody"></div>`;
-  $("#dl",el).onclick=downloadData;
+  $("#dl",el).onclick=downloadData;quickAdd($("#qa",el));
   const d=$("#disc",el);if(d)d.onclick=()=>{if(confirm("Discard all unpublished changes and go back to the published content?")){store.del("csk_draft");location.reload()}};
   $$("[data-tab]",el).forEach(b=>b.onclick=()=>{AS.tab=b.dataset.tab;AS.sess=null;rerender()});
   const body=$("#aBody",el);({sessions:adminSessions,presentations:adminPpts,quiz:adminQuiz,apps:adminApps,upcoming:adminUpcoming,settings:adminSettings})[AS.tab](body);
@@ -1044,6 +1045,69 @@ const listRow=(title,sub,acts)=>`<div class="arow"><div class="mid"><b>${title}<
 const aBtn=(a,id,label,cls="btn-ghost")=>`<button class="btn ${cls} btn-sm" data-a="${a}" data-id="${esc(id)}">${label}</button>`;
 function bind(body,map){body.onclick=e=>{const b=e.target.closest("[data-a]");if(b&&map[b.dataset.a])map[b.dataset.a](b.dataset.id)}}
 
+/* --- quick add: paste any link and it goes to the right section --- */
+const QA_KINDS={video:"Video recording",audio:"Audio recording",ppt:"Presentation",quiz:"Quiz",app:"Web application"};
+function detectKind(u){
+  if(ytId(u))return "video";
+  if(/docs\.google\.com\/presentation|\.(pptx?|ppsx?|pdf)(\?|#|$)/i.test(u))return "ppt";
+  if(/docs\.google\.com\/forms|forms\.gle|forms\.office\.com/i.test(u))return "quiz";
+  if(/drive\.google\.com\/(file|open|uc)|drive\.google\.com\/.*[?&]id=/i.test(u))return "audio";
+  return "app";
+}
+/* "cs Video Bonus as Marketing Tool Part 1 2 11 26" -> title "Bonus as Marketing Tool Part 1", date 2026-11-02 */
+function splitTitleDate(t){
+  t=(t||"").trim();let date="";
+  const m=t.match(/(\d{1,2})[ ./-](\d{1,2})[ ./-](\d{4}|\d{2})\s*$/);
+  if(m){const d=+m[1],mo=+m[2],y=m[3].length===2?2000+ +m[3]:+m[3];
+    if(d>=1&&d<=31&&mo>=1&&mo<=12)date=`${y}-${String(mo).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+    if(date)t=t.slice(0,m.index).trim()}
+  t=t.replace(/^cs\s+/i,"").replace(/^video\s+/i,"").trim();
+  return {title:t,date};
+}
+async function ytTitle(u){
+  const id=ytId(u);if(!id)return "";
+  try{const c=new AbortController(),t=setTimeout(()=>c.abort(),4000);
+    const r=await fetch("https://www.youtube.com/oembed?format=json&url="+encodeURIComponent("https://www.youtube.com/watch?v="+id),{signal:c.signal});clearTimeout(t);
+    return r.ok?((await r.json()).title||""):""}catch(_){return ""}
+}
+function quickAdd(box){
+  box.innerHTML=`<div class="panel" style="margin-bottom:18px"><h3 class="serif" style="font-size:20px;margin-bottom:4px">Quick add – paste any link</h3>
+    <p style="color:var(--muted);font-size:14px;margin-bottom:12px">Paste a YouTube, Google Drive, Slides, Form or web-app link. It is sent to the right section automatically (Video, Audio, Presentations, Quiz or Web Applications) and looks exactly like the other items there.</p>
+    <form id="qaForm" style="display:flex;gap:10px;flex-wrap:wrap" novalidate><input class="txt" id="qaUrl" type="url" placeholder="Paste the link here" aria-label="Link to add" style="flex:1;min-width:240px" autocomplete="off">
+    <select class="txt" id="qaKind" aria-label="Section" style="max-width:230px;flex:none"><option value="">Section: auto-detect</option>${Object.keys(QA_KINDS).map(k=>`<option value="${k}">${QA_KINDS[k]}</option>`).join("")}</select>
+    <button class="btn btn-gold" type="submit">Add</button></form><div id="qaErr"></div></div>`;
+  const go=async()=>{
+    const u=$("#qaUrl",box).value.trim(),er=$("#qaErr",box);er.innerHTML="";
+    if(!u)return;
+    if(!safeUrl(u)){er.innerHTML='<div class="err">That does not look like a link. It must start with http:// or https://</div>';return}
+    const kind=$("#qaKind",box).value||detectKind(u);
+    $("#qaUrl",box).value="";
+    await quickAddForm(kind,u);
+  };
+  $("#qaForm",box).onsubmit=e=>{e.preventDefault();go()};
+  $("#qaUrl",box).addEventListener("paste",()=>setTimeout(go,60));
+}
+async function quickAddForm(kind,u){
+  const today=new Date().toISOString().slice(0,10);
+  if(kind==="video"||kind==="audio"){
+    const open=[...DATA.sessions].filter(x=>recsOf(x)).sort((a,b)=>(b.from||"").localeCompare(a.from||""));
+    if(!open.length){toast("Create a session first (Sessions & Recordings tab), then paste the link again.");return}
+    let t="";if(kind==="video")t=await ytTitle(u);
+    const sp=splitTitleDate(t);
+    const fields=[{k:"session",label:"Add to session",type:"select",opts:open.map(x=>({v:x.id,l:x.title})),req:1},...recFields];
+    const values={session:open[0].id,date:sp.date||today,title:sp.title,lang:"tamil",[kind]:u};
+    showForm({title:"Add "+QA_KINDS[kind].toLowerCase(),intro:"Check the title and date, then press Save. It will appear in the "+QA_KINDS[kind]+"s section.",fields,values,onSubmit:async v=>{
+      if(!v.video&&!v.audio)return "Add a video link or an audio link.";
+      const s=DATA.sessions.find(x=>x.id===v.session),recs=s&&recsOf(s);if(!recs)return "That session is locked.";
+      const {session,...rec}=v;recs.push({id:uid("r"),...rec});AS.tab="sessions";AS.sess=s.id;await commit()}});
+  }else if(kind==="ppt"){
+    showForm({title:"Add presentation",fields:pptFields,values:{date:today,link:u},onSubmit:async v=>{DATA.presentations.push({id:uid("p"),...v});AS.tab="presentations";AS.sess=null;await commit()}});
+  }else if(kind==="quiz"){
+    showForm({title:"Add quiz",fields:quizFields,values:{url:u},onSubmit:async v=>{DATA.quizzes.push({id:uid("q"),...v});AS.tab="quiz";AS.sess=null;await commit()}});
+  }else{
+    showForm({title:"Add web application",fields:appFields,values:{url:u},onSubmit:async v=>{DATA.apps.push({id:uid("a"),...v});AS.tab="apps";AS.sess=null;await commit()}});
+  }
+}
 /* --- presentations --- */
 const pptFields=[{k:"title",label:"Title",req:1},{k:"desc",label:"Short description / topic",type:"textarea",rows:2},{k:"date",label:"Release date",type:"date",req:1},
   {k:"link",label:"Presentation link",type:"url",req:1,hint:"Paste the Google Slides or Google Drive link. Sharing must be “Anyone with the link”. A direct .pptx link also works."},

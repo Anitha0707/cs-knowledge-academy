@@ -23,3 +23,7 @@ SEO SETUP (one-time, after you know the website address)
 2. Upload everything (index.html, data.js, assets/, apps/, robots.txt, sitemap.xml).
 3. In Google Search Console add your site, then submit  /sitemap.xml  and use "Request indexing" on the home page.
 4. Add the same address to your YouTube channel "About" links and your WhatsApp business profile.
+
+Admin tip: on the Admin page, "Quick add" lets you paste any link (YouTube, Google Drive audio, Slides/PDF,
+Google Form, web app). It is sorted into the right section automatically; check the details and press Save,
+then Download data.js and upload it.
