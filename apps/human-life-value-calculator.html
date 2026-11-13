@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Human Life Value Calculator</title>
+<style>
+:root{--navy:#142b4a;--blue:#245b86;--gold:#c89b3c;--bg:#f3f6fa;--ink:#1d2939;--muted:#667085;--line:#d8e0e9}
+*{box-sizing:border-box}body{margin:0;padding:24px 14px;background:var(--bg);color:var(--ink);font:16px/1.45 Arial,Helvetica,sans-serif}
+.wrap{max-width:900px;margin:auto}.header{background:linear-gradient(120deg,var(--navy),var(--blue));color:#fff;padding:25px 28px;border-radius:16px 16px 0 0}
+h1{margin:0 0 5px;font-size:clamp(24px,4vw,32px)}.header p{margin:0;color:#e5edf5}
+.panel{background:#fff;padding:25px 28px;border:1px solid var(--line);border-top:0;border-radius:0 0 16px 16px}
+h2{color:var(--navy);font-size:18px;margin:2px 0 16px;padding-bottom:8px;border-bottom:2px solid #e9eef4}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px 20px}
+label{display:block;font-weight:600;font-size:14px;margin-bottom:6px}
+input{width:100%;min-width:0;min-height:46px;border:1px solid #cbd5e1;border-radius:8px;padding:10px 12px;font-size:16px;color:var(--ink);background:#fff}
+input:focus{outline:3px solid #d7e8f7;border-color:var(--blue)}input[readonly]{background:#f1f5f9;color:#344054;font-weight:600}
+.hint{display:block;color:var(--muted);font-size:12px;margin-top:5px;font-weight:400}
+.result{margin-top:24px;padding:20px;border-radius:12px;background:#f7f9fc;border:1px solid #dce5ef}
+.result-label{color:#475467;font-size:14px;font-weight:700}.amount{color:var(--navy);font-size:clamp(30px,5vw,40px);font-weight:800;margin:5px 0 3px;overflow-wrap:anywhere}
+.sub{color:var(--muted);font-size:13px}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+button{border:0;border-radius:8px;padding:12px 18px;min-height:44px;font-weight:700;font-size:15px;cursor:pointer}
+.primary{background:var(--navy);color:#fff}.secondary{background:#e8edf3;color:var(--navy)}
+.message{color:#b42318;font-size:13px;margin-top:12px;min-height:18px}
+.formula{margin-top:20px;padding:14px 16px;background:#fffaf0;border-left:4px solid var(--gold);border-radius:6px;color:#59451c;font-size:13px}
+.footer{color:var(--muted);text-align:center;font-size:12px;margin-top:14px}
+.print-summary{display:none}
+@media(max-width:600px){body{padding:12px 8px}.header,.panel{padding:20px 16px}.grid{grid-template-columns:1fr;gap:13px}}
+@media print{
+  @page{size:A4;margin:16mm}
+  body{background:#fff;padding:0;color:#111}
+  .wrap{max-width:none}
+  .header,.panel{border-radius:0;box-shadow:none}
+  .header{background:#142b4a!important;color:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .panel{border:1px solid #bbb;padding:18px}
+  .actions,.message,.formula,.footer{display:none!important}
+  .print-summary{display:block!important;margin-top:22px;padding:16px;border:1px solid #bbb;border-radius:8px;break-inside:avoid}
+  .print-summary h2{margin-top:0}
+  .print-summary table{width:100%;border-collapse:collapse}
+  .print-summary td{padding:7px;border-bottom:1px solid #ddd;vertical-align:top}
+  .print-summary td:first-child{font-weight:700;width:48%}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="header">
+<h1>Human Life Value Calculator</h1>
+<p>Estimate the present value of the financial support required by the family until retirement.</p>
+</header>
+<main class="panel">
+<h2>Personal &amp; Income Details</h2>
+<form id="hlvForm" novalidate>
+<div class="grid">
+<div><label for="name">Name</label><input id="name" type="text" placeholder="Enter name"></div>
+<div><label for="occupation">Occupation</label><input id="occupation" type="text" placeholder="Enter occupation"></div>
+<div><label for="age">Present Age (years)</label><input id="age" type="number" min="0" max="100" step="1" value="35"></div>
+<div><label for="retirementAge">Retirement Age (years)</label><input id="retirementAge" type="number" min="1" max="100" step="1" value="60"></div>
+<div><label for="income">Monthly Income (₹)</label><input id="income" type="number" min="0" step="0.01" value="100000"></div>
+<div><label for="expenses">Personal Expenses (₹ per month)</label><input id="expenses" type="number" min="0" step="0.01" value="30000"></div>
+<div><label for="family">Amount for Family (₹ per month)</label><input id="family" type="text" readonly value="₹70,000.00"><span class="hint">Monthly income less personal expenses.</span></div>
+<div><label for="years">Number of Years of Service Left</label><input id="years" type="text" readonly value="25 years"></div>
+<div><label for="rate">Assumed Interest Rate (% p.a.)</label><input id="rate" type="number" min="0" max="100" step="0.01" value="8"></div>
+<div><label for="inflation">Assumed Inflation Rate (% p.a.)</label><input id="inflation" type="number" min="0" max="100" step="0.01" value="5"></div>
+<div><label for="netRate">Net Rate of Return (% p.a.)</label><input id="netRate" type="text" readonly value="2.86%"><span class="hint">[(1 + interest rate) ÷ (1 + inflation rate) − 1] × 100.</span></div>
+</div>
+<section class="result" aria-live="polite">
+<div class="result-label">HUMAN LIFE VALUE</div>
+<div class="amount" id="hlv">—</div>
+<div class="sub" id="resultNote">Present value of monthly family support until retirement.</div>
+</section>
+<section class="print-summary" id="printSummary">
+  <h2>Human Life Value Calculation – Result Summary</h2>
+  <div id="summaryContent"></div>
+</section>
+<div class="message" id="message" role="alert"></div>
+<div class="actions">
+<button class="primary" type="button" id="printBtn">Print / Save as PDF</button>
+<button class="secondary" type="button" id="downloadBtn">Download Result</button>
+<button class="secondary" type="reset">Reset Calculator</button>
+</div>
+</form>
+<div class="formula"><strong>Calculation method:</strong> Net Rate of Return = [(1 + Interest Rate) ÷ (1 + Inflation Rate) − 1] × 100, using the rates as decimals. The net annual effective rate is converted to its equivalent monthly effective rate. HLV is the present value of the monthly family amount over the remaining months until retirement. Monthly payments are assumed at each month-end. If the net rate is zero, HLV equals the total of the monthly family amounts.</div>
+<div class="footer">Illustrative calculation. The result depends on the assumptions and information entered.</div>
+</main>
+</div>
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+const money=v=>new Intl.NumberFormat("en-IN",{style:"currency",currency:"INR",minimumFractionDigits:2,maximumFractionDigits:2}).format(v);
+let lastResult=null;
+
+function calculate(){
+ const age=Number($("age").value),ret=Number($("retirementAge").value),income=Number($("income").value),expenses=Number($("expenses").value),interest=Number($("rate").value),inflation=Number($("inflation").value);
+ const msg=$("message");msg.textContent="";
+ $("hlv").textContent="—";$("family").value="—";$("years").value="—";$("netRate").value="—";lastResult=null;
+ if([age,ret,income,expenses,interest,inflation].some(v=>!Number.isFinite(v))){msg.textContent="Please enter valid numbers in all calculation fields.";return;}
+ if(age<0||age>100||ret<=0||ret>100){msg.textContent="Please enter a valid present age and retirement age.";return;}
+ if(ret<=age){msg.textContent="Retirement age must be greater than present age.";return;}
+ if(income<0||expenses<0||expenses>income){msg.textContent="Personal expenses must be zero or more and cannot exceed monthly income.";return;}
+ if(interest<0||interest>100||inflation<0||inflation>100){msg.textContent="Please enter interest and inflation rates between 0% and 100%.";return;}
+ const interestDecimal=interest/100, inflationDecimal=inflation/100;
+ const net=((1+interestDecimal)/(1+inflationDecimal)-1)*100;
+ const monthlyFamily=income-expenses,years=ret-age,months=years*12;
+ const r=Math.pow(1+net/100,1/12)-1;
+ const hlv=r===0?monthlyFamily*months:monthlyFamily*(1-Math.pow(1+r,-months))/r;
+ if(!Number.isFinite(hlv)){msg.textContent="The result is outside the calculator's supported range. Please review the inputs.";return;}
+ const data={
+  name:$("name").value.trim()||"Not provided",
+  occupation:$("occupation").value.trim()||"Not provided",
+  age,retirementAge:ret,income,expenses,monthlyFamily,years,interest,inflation,net,months,hlv
+ };
+ lastResult=data;
+ $("family").value=money(monthlyFamily);
+ $("years").value=years+(years===1?" year":" years");
+ $("netRate").value=net.toFixed(2)+"%";
+ $("hlv").textContent=money(hlv);
+ $("resultNote").textContent=months.toLocaleString("en-IN")+" monthly payments discounted at a net rate of "+net.toFixed(2)+"% p.a. ("+(r*100).toFixed(4)+"% per month).";
+ renderSummary(data);
+}
+
+function renderSummary(d){
+ const rows=[
+  ["Name",d.name],["Occupation",d.occupation],["Present Age",d.age+" years"],
+  ["Monthly Income",money(d.income)],["Personal Expenses",money(d.expenses)],
+  ["Amount for Family",money(d.monthlyFamily)+" per month"],["Retirement Age",d.retirementAge+" years"],
+  ["Service Left",d.years+" years ("+d.months+" months)"],
+  ["Assumed Interest Rate",d.interest.toFixed(2)+"% p.a."],
+  ["Assumed Inflation Rate",d.inflation.toFixed(2)+"% p.a."],
+  ["Net Rate of Return",d.net.toFixed(2)+"% p.a."],["Human Life Value",money(d.hlv)]
+ ];
+ $("summaryContent").innerHTML="<table>"+rows.map(row=>"<tr><td>"+escapeHtml(row[0])+"</td><td>"+escapeHtml(String(row[1]))+"</td></tr>").join("")+"</table>";
+}
+function escapeHtml(s){return s.replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function downloadResult(){
+ if(!lastResult){$("message").textContent="Please correct the entries before downloading the result.";return;}
+ const d=lastResult;
+ const lines=[
+  "HUMAN LIFE VALUE CALCULATION",
+  "Name: "+d.name,"Occupation: "+d.occupation,"Present Age: "+d.age+" years",
+  "Monthly Income: "+money(d.income),"Personal Expenses: "+money(d.expenses),
+  "Amount for Family: "+money(d.monthlyFamily)+" per month","Retirement Age: "+d.retirementAge+" years",
+  "Number of Years of Service Left: "+d.years,"Assumed Interest Rate: "+d.interest.toFixed(2)+"% p.a.",
+  "Assumed Inflation Rate: "+d.inflation.toFixed(2)+"% p.a.","Net Rate of Return: "+d.net.toFixed(2)+"% p.a.",
+  "Human Life Value: "+money(d.hlv),"",
+  "Net return formula: [(1 + interest rate) / (1 + inflation rate) − 1] × 100, with both rates expressed as decimals.",
+  "Method: Present value of monthly family support discounted at the equivalent monthly effective net rate.",
+  "Assumption: Monthly support is payable at each month-end."
+ ];
+ const blob=new Blob(["\uFEFF"+lines.join("\r\n")],{type:"text/plain;charset=utf-8"});
+ const url=URL.createObjectURL(blob),a=document.createElement("a");
+ a.href=url;a.download="Human_Life_Value_Result.txt";document.body.appendChild(a);a.click();a.remove();
+ setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+["age","retirementAge","income","expenses","rate","inflation","name","occupation"].forEach(id=>$(id).addEventListener("input",calculate));
+$("hlvForm").addEventListener("reset",()=>setTimeout(calculate,0));
+$("printBtn").addEventListener("click",()=>{if(!lastResult){$("message").textContent="Please correct the entries before printing.";return;}window.print();});
+$("downloadBtn").addEventListener("click",downloadResult);
+calculate();
+})();
+</script>
+</body>
+</html>

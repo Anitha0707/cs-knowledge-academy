@@ -96,6 +96,7 @@ main{min-width:0;display:flex;flex-direction:column;min-height:100vh}
 .content{padding:28px 36px 40px;max-width:1180px;width:100%;flex:1}
 .footer{padding:20px 36px 30px;color:var(--muted);font-size:13px;display:flex;gap:10px 22px;flex-wrap:wrap;border-top:1px solid var(--line)}
 .footer a{color:var(--muted)}
+.footer .promo{flex-basis:100%;font-size:11px;opacity:.75;margin-top:2px}.footer .promo a{text-decoration:none}
 .page{animation:fade .3s ease}
 @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 .scrim{display:none}
@@ -704,7 +705,7 @@ function renderChrome(){
   const wa=waLink("Hello, I have a question about CS Knowledge Academy.");
   $("#sidePhones").innerHTML=[...(S_().phones||[])].sort((a,b)=>isCallOnly(a)-isCallOnly(b)).map(n=>`<span class="ph"><a href="${telHref(n)}">${esc(n)}</a>${callTag(n)}</span>`).join("");$("#waSide").href=wa;$("#waSide").innerHTML=WA_SVG+" Chat on WhatsApp";$("#fab").href=wa;
   const yt=safeUrl(S_().youtube);
-  $("#footer").innerHTML=`<span>© ${new Date().getFullYear()} ${ACADEMY}</span>${S_().email?`<a href="mailto:${esc(S_().email)}">${esc(S_().email)}</a>`:""}${phoneLinks()}${waDigits()?`<a href="${wa}" target="_blank" rel="noopener noreferrer">WhatsApp</a>`:""}${yt?`<a href="${esc(yt)}" target="_blank" rel="noopener noreferrer">YouTube</a>`:""}`;
+  $("#footer").innerHTML=`<span>© ${new Date().getFullYear()} ${ACADEMY}</span>${S_().email?`<a href="mailto:${esc(S_().email)}">${esc(S_().email)}</a>`:""}${phoneLinks()}${waDigits()?`<a href="${wa}" target="_blank" rel="noopener noreferrer">WhatsApp</a>`:""}${yt?`<a href="${esc(yt)}" target="_blank" rel="noopener noreferrer">YouTube</a>`:""}<span class="promo">Website by T. Anita, LIC agent website builder · <a href="tel:+91848941103">848941103</a> · ₹3525</span>`;
 }
 function renderAdminBar(){
   const b=$("#adminbar");b.hidden=!ADMIN;if(!ADMIN)return;

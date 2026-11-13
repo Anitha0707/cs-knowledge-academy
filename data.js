@@ -1,15 +1,15 @@
 /* CS KNOWLEDGE ACADEMY – site content. Edit through the Admin page, then replace this file. */
 window.CSK_DATA = {
- "updated": 1794403249765,
+ "updated": 1794577495954,
  "settings": {
   "whatsapp": "919500076095",
   "email": "csridharanlic@gmail.com",
   "youtube": "",
+  "adminHash": "ffb9c8bb9d653dd67b73ad128590b41d21244748ffacfa086eaa9173789899f7",
   "phones": [
    "+91 94433 11844",
    "+91 95000 76095"
-  ],
-  "adminHash": "23c752d432e1de8304a9180f4437ab40e987978fd3f8fb5d74bcfdd50f10eb6c"
+  ]
  },
  "sessions": [
   {
@@ -44,7 +44,7 @@ window.CSK_DATA = {
      "title": "Bank, Post Office & LIC Comparison, NRI FNIO Part 1",
      "group": "Level 2",
      "video": "https://youtu.be/_b9vOu-RVck",
-     "audio": "",
+     "audio": "https://drive.google.com/file/d/1UkfZDb7v0U4g_1rYAnnCn7zQ1voB6alE/view?usp=sharing",
      "lang": "tamil"
     },
     {
@@ -58,11 +58,38 @@ window.CSK_DATA = {
     },
     {
      "id": "r_l2n5",
-     "date": "2026-11-10",
+     "date": "2026-11-11",
      "title": "Financial Planning by Sri M Karunanidhi, LUGI",
      "group": "Level 2",
      "video": "https://youtu.be/YiNlYVNCwbo",
-     "audio": "",
+     "audio": "https://drive.google.com/file/d/1eqGLtvX8MaxI_ZqiIccnSXNGSOPi4Jro/view?usp=sharing",
+     "lang": "tamil"
+    },
+    {
+     "id": "r_l2n6",
+     "date": "2026-11-11",
+     "title": "NRI FNIO Part 1",
+     "group": "Level 2",
+     "video": "https://www.youtube.com/watch?v=es8N_lt-5rk",
+     "audio": "https://drive.google.com/file/d/1opuTJX5ZBnfFD2aZOxJi1oXFeE0SnkRf/view?usp=sharing",
+     "lang": "tamil"
+    },
+    {
+     "id": "r_l2n7",
+     "date": "2026-11-12",
+     "title": "NRI FNIO Part 2",
+     "group": "Level 2",
+     "video": "https://www.youtube.com/watch?v=paCnarAA0HE",
+     "audio": "https://drive.google.com/file/d/1Ta42Da9V3vp6g0ExdfkRWxLKDYjObCSS/view?usp=sharing",
+     "lang": "tamil"
+    },
+    {
+     "id": "r_l2n8",
+     "date": "2026-11-12",
+     "title": "Human Life Value",
+     "group": "Level 2",
+     "video": "",
+     "audio": "https://drive.google.com/file/d/1zNYZPVAV9Qa7NEz1QflWx0eCN205sZOS/view?usp=sharing",
      "lang": "tamil"
     }
    ]
@@ -758,6 +785,14 @@ window.CSK_DATA = {
    "date": "2026-11-09",
    "link": "presentations/Underwriting_Simple_9.11.26.pdf",
    "download": ""
+  },
+  {
+   "id": "p17",
+   "title": "NRI / FNIO Underwriting",
+   "desc": "Residence groups, mail order business, non-medical schemes and plan rules for NRIs and FNIOs. Presented by C. Sridharan.",
+   "date": "2026-11-13",
+   "link": "presentations/NRI_FNIO_Underwriting.pdf",
+   "download": ""
   }
  ],
  "apps": [
@@ -830,6 +865,13 @@ window.CSK_DATA = {
    "title": "SUC Limit Finder",
    "desc": "Ready reckoner",
    "url": "apps/suc-limit-finder.html"
+  },
+  {
+   "id": "a11",
+   "group": "Ready Reckoners",
+   "title": "Human Life Value (HLV) Calculator",
+   "desc": "Ready reckoner",
+   "url": "apps/human-life-value-calculator.html"
   }
  ],
  "quizzes": [
