@@ -96,7 +96,16 @@ main{min-width:0;display:flex;flex-direction:column;min-height:100vh}
 .content{padding:28px 36px 40px;max-width:1180px;width:100%;flex:1}
 .footer{padding:20px 36px 30px;color:var(--muted);font-size:13px;display:flex;gap:10px 22px;flex-wrap:wrap;border-top:1px solid var(--line)}
 .footer a{color:var(--muted)}
-.footer .promo{flex-basis:100%;font-size:11px;opacity:.75;margin-top:2px}.footer .promo a{text-decoration:none}
+.footer .disc{flex-basis:100%;font-size:15px;line-height:1.6;margin:0;color:#000;font-weight:800;background:var(--gold-2);border:2px solid #000;border-radius:12px;padding:14px 16px}.footer .disc b{display:block;font-size:17px;letter-spacing:1px;text-transform:uppercase;font-weight:900;color:#000}
+.disclaimer{margin:0 0 18px;padding:16px 18px;border-radius:14px;border:2px solid #000;border-left:8px solid #000;background:var(--gold-2);color:#000;font-size:16px;line-height:1.6;font-weight:800;box-shadow:0 6px 16px rgba(0,0,0,.15)}
+.disclaimer b{display:block;margin-bottom:4px;font-size:19px;font-weight:900;letter-spacing:1.2px;text-transform:uppercase;color:#000}
+.credit{flex-basis:100%;overflow:hidden;border-radius:999px;background:linear-gradient(90deg,var(--navy),var(--navy-2),var(--navy));border:1.5px solid var(--gold);padding:10px 0;margin-top:6px;box-shadow:0 6px 18px rgba(11,27,58,.25)}
+.credit .track{display:inline-flex;white-space:nowrap;animation:creditmove 24s linear infinite}
+.credit:hover .track{animation-play-state:paused}
+.credit span{color:var(--gold-2);font-weight:800;font-size:15px;letter-spacing:.3px;padding:0 40px}
+.credit a{color:#fff;text-decoration:underline}
+.credit-top{position:relative;z-index:80;border-radius:0;margin:0;border:0;border-bottom:2px solid var(--gold);box-shadow:0 4px 14px rgba(11,27,58,.3)}
+@keyframes creditmove{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 .page{animation:fade .3s ease}
 @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 .scrim{display:none}
@@ -121,6 +130,8 @@ main{min-width:0;display:flex;flex-direction:column;min-height:100vh}
 .hero-grid>div:first-child{flex:1;min-width:0}
 .hero-logo{display:inline-grid;place-items:center;width:132px;height:132px;padding:12px;margin-bottom:14px;border-radius:30px;background:#fff;box-shadow:0 14px 34px rgba(0,0,0,.35),0 0 0 4px rgba(201,162,75,.55)}.hero-logo img{width:100%;height:100%;object-fit:contain}
 @media(max-width:560px){.hero-logo{width:104px;height:104px;border-radius:24px}}
+.hero-logo.hero-logo-wide{width:min(100%,460px);height:auto;padding:14px 20px;border-radius:26px}.hero-logo.hero-logo-wide img{height:auto}
+@media(max-width:560px){.hero-logo.hero-logo-wide{width:100%;max-width:320px;height:auto;padding:12px 16px;border-radius:22px}}
 .hero .hero-crest .crest{width:72px;height:72px;font-size:28px}
 .hero .eyebrow{margin-top:12px;font-size:13px;font-weight:700;letter-spacing:.32em;text-transform:uppercase;color:var(--gold-2)}
 .hero h1{font-family:'Playfair Display',serif;font-weight:900;font-size:clamp(30px,4vw,54px);line-height:1.05;text-transform:uppercase;margin-top:8px}
@@ -442,6 +453,7 @@ textarea.txt{min-height:120px;resize:vertical}
 <p>Contact: <a href="mailto:csridharanlic@gmail.com">csridharanlic@gmail.com</a> · <a href="tel:+919443311844">+91 94433 11844</a> · <a href="tel:+919500076095">+91 95000 76095</a></p>
 </div></noscript>
 
+<div class="credit credit-top" id="credit" role="marquee" aria-label="Website by T Anitha, LIC agent website builder, 8489411033, ₹3525"></div>
 <div id="app">
   <aside class="sidebar" id="sidebar">
     <a class="brand" href="#/home">
@@ -705,7 +717,8 @@ function renderChrome(){
   const wa=waLink("Hello, I have a question about CS Knowledge Academy.");
   $("#sidePhones").innerHTML=[...(S_().phones||[])].sort((a,b)=>isCallOnly(a)-isCallOnly(b)).map(n=>`<span class="ph"><a href="${telHref(n)}">${esc(n)}</a>${callTag(n)}</span>`).join("");$("#waSide").href=wa;$("#waSide").innerHTML=WA_SVG+" Chat on WhatsApp";$("#fab").href=wa;
   const yt=safeUrl(S_().youtube);
-  $("#footer").innerHTML=`<span>© ${new Date().getFullYear()} ${ACADEMY}</span>${S_().email?`<a href="mailto:${esc(S_().email)}">${esc(S_().email)}</a>`:""}${phoneLinks()}${waDigits()?`<a href="${wa}" target="_blank" rel="noopener noreferrer">WhatsApp</a>`:""}${yt?`<a href="${esc(yt)}" target="_blank" rel="noopener noreferrer">YouTube</a>`:""}<span class="promo">Website by T. Anita, LIC agent website builder · <a href="tel:+91848941103">848941103</a> · ₹3525</span>`;
+  $("#credit").innerHTML=`<div class="track"><span>✨ Website by T Anitha · LIC agent website builder · 📞 <a href="tel:+918489411033">8489411033</a> · Price quoted ₹3525 ✨</span><span>✨ Website by T Anitha · LIC agent website builder · 📞 <a href="tel:+918489411033">8489411033</a> · Price quoted ₹3525 ✨</span><span>✨ Website by T Anitha · LIC agent website builder · 📞 <a href="tel:+918489411033">8489411033</a> · Price quoted ₹3525 ✨</span><span>✨ Website by T Anitha · LIC agent website builder · 📞 <a href="tel:+918489411033">8489411033</a> · Price quoted ₹3525 ✨</span></div>`;
+  $("#footer").innerHTML=`<span>© ${new Date().getFullYear()} ${ACADEMY}</span>${S_().email?`<a href="mailto:${esc(S_().email)}">${esc(S_().email)}</a>`:""}${phoneLinks()}${waDigits()?`<a href="${wa}" target="_blank" rel="noopener noreferrer">WhatsApp</a>`:""}${yt?`<a href="${esc(yt)}" target="_blank" rel="noopener noreferrer">YouTube</a>`:""}<p class="disc"><b>Disclaimer:</b> The presentations have been made for education purposes only so that the LIC field force can be able to explain the Products to their prospects with more comfort and confidence. LIC's official circulars are final, in better understanding or interpretation of the features of products and concepts.</p>`;
 }
 function renderAdminBar(){
   const b=$("#adminbar");b.hidden=!ADMIN;if(!ADMIN)return;
@@ -850,7 +863,7 @@ VIEWS.home=el=>{
   el.innerHTML=`
   <section class="hero"><div class="hero-grid">
     <div>
-      <div class="hero-logo"><img src="assets/logo-icon.png" alt="CS Knowledge Academy logo" width="445" height="445"></div>
+      <div class="hero-logo hero-logo-wide"><img src="assets/logo-full.png" alt="CS Knowledge Academy – Life Insurance Training" width="1028" height="227"></div>
       <div class="eyebrow">Learn &nbsp;|&nbsp; Grow &nbsp;|&nbsp; Succeed</div>
       <h1>${ACADEMY}</h1>
       <p>Recordings, presentations and learning tools from our sessions – all in one place.</p>
@@ -973,7 +986,7 @@ VIEWS.ongoing=el=>{
 };
 
 VIEWS.presentations=el=>{
-  el.innerHTML=`<div class="toolbar"><input class="txt" id="q" type="search" placeholder="Search presentations by topic…" aria-label="Search presentations"><select class="txt" id="sort" aria-label="Sort"><option value="new">Newest first</option><option value="old">Oldest first</option></select></div><div id="out"></div>`;
+  el.innerHTML=`<div class="toolbar"><input class="txt" id="q" type="search" placeholder="Search presentations by topic…" aria-label="Search presentations"><select class="txt" id="sort" aria-label="Sort"><option value="new">Newest first</option><option value="old">Oldest first</option></select></div><div class="disclaimer"><b>Disclaimer</b>The presentations have been made for education purposes only so that the LIC field force can be able to explain the Products to their prospects with more comfort and confidence. LIC's official circulars are final, in better understanding or interpretation of the features of products and concepts.</div><div id="out"></div>`;
   const draw=()=>{
     const q=norm($("#q",el).value.trim()),dir=$("#sort",el).value;
     const rows=DATA.presentations.filter(p=>!q||norm(`${p.title} ${p.desc||""} ${fmtDate(p.date)}`).includes(q)).map(p=>p);

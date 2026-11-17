@@ -1,15 +1,15 @@
 /* CS KNOWLEDGE ACADEMY – site content. Edit through the Admin page, then replace this file. */
 window.CSK_DATA = {
- "updated": 1794577495954,
+ "updated": 1794920225804,
  "settings": {
   "whatsapp": "919500076095",
   "email": "csridharanlic@gmail.com",
   "youtube": "",
-  "adminHash": "a61d13501330ca40a67fd76f4e9ada6a93f557ee28015c28f16f945b9f611f0a",
   "phones": [
    "+91 94433 11844",
    "+91 95000 76095"
-  ]
+  ],
+  "adminHash": "a61d13501330ca40a67fd76f4e9ada6a93f557ee28015c28f16f945b9f611f0a"
  },
  "sessions": [
   {
@@ -91,6 +91,60 @@ window.CSK_DATA = {
      "video": "",
      "audio": "https://drive.google.com/file/d/1zNYZPVAV9Qa7NEz1QflWx0eCN205sZOS/view?usp=sharing",
      "lang": "tamil"
+    },
+    {
+     "id": "rgl6s59",
+     "date": "2026-11-13",
+     "title": "CAGR, IRR   13.11.26",
+     "lang": "tamil",
+     "group": "",
+     "video": "",
+     "audio": "https://drive.google.com/file/d/1m2NHxUbUgC6Rk5myPm-f91JWbAiibU5M/view?usp=sharing"
+    },
+    {
+     "id": "rlp51x7",
+     "date": "2026-11-16",
+     "title": "CAGR, IRR Part 2    16.11.26",
+     "lang": "tamil",
+     "group": "",
+     "video": "",
+     "audio": "https://drive.google.com/file/d/1HxRZzHEXs5uRPdMbV4jckMWaoT8sG9nS/view?usp=sharing"
+    },
+    {
+     "id": "rzikaq2",
+     "date": "2026-11-16",
+     "title": "Employer Employee 16.11.26",
+     "lang": "tamil",
+     "group": "",
+     "video": "",
+     "audio": "https://drive.google.com/file/d/1Py7M14UvaOjspIhxemZJ8RcJb3fxWGCw/view?usp=sharing"
+    },
+    {
+     "id": "rvp9c3q",
+     "date": "2026-11-13",
+     "title": "CAGR IRR",
+     "lang": "tamil",
+     "group": "",
+     "video": "https://www.youtube.com/watch?v=3-WdR1frQMw",
+     "audio": ""
+    },
+    {
+     "id": "r39hqxa",
+     "date": "2026-11-16",
+     "title": "Employer Employee",
+     "lang": "tamil",
+     "group": "",
+     "video": "https://www.youtube.com/watch?v=FIZaq97lhoQ",
+     "audio": ""
+    },
+    {
+     "id": "rlxf5bs",
+     "date": "2026-11-16",
+     "title": "IRR CAGR Part 2",
+     "lang": "tamil",
+     "group": "",
+     "video": "https://www.youtube.com/watch?v=KPWgfA-ByxI",
+     "audio": ""
     }
    ]
   },
@@ -793,6 +847,14 @@ window.CSK_DATA = {
    "date": "2026-11-13",
    "link": "presentations/NRI_FNIO_Underwriting.pdf",
    "download": ""
+  },
+  {
+   "id": "pej272z",
+   "title": "CS IRR, XIRR & CAGR",
+   "desc": "",
+   "date": "2026-11-15",
+   "link": "https://drive.google.com/file/d/10OD9iTKplX9lp4ziQ80KMz6BlwyGB37u/view?usp=sharing",
+   "download": "https://drive.google.com/file/d/10OD9iTKplX9lp4ziQ80KMz6BlwyGB37u/view?usp=sharing"
   }
  ],
  "apps": [
