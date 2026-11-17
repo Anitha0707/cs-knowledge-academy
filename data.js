@@ -5,7 +5,7 @@ window.CSK_DATA = {
   "whatsapp": "919500076095",
   "email": "csridharanlic@gmail.com",
   "youtube": "",
-  "adminHash": "ffb9c8bb9d653dd67b73ad128590b41d21244748ffacfa086eaa9173789899f7",
+  "adminHash": "a61d13501330ca40a67fd76f4e9ada6a93f557ee28015c28f16f945b9f611f0a",
   "phones": [
    "+91 94433 11844",
    "+91 95000 76095"
