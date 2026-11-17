@@ -912,7 +912,14 @@ function recRow(r,kinds){
     <div class="mid"><b>${esc(r.title)}</b><small>${fmtDate(r.date)}${r.group?" · "+esc(r.group):""} · <span class="lchip ${langOf(r)}">${langOf(r)==="english"?"English":"தமிழ் Tamil"}</span></small></div>
     <div class="acts">${kinds.map(k=>!r[k]?"":k==="video"?`<a class="btn btn-primary btn-sm" href="${esc(safeUrl(r.video))}" target="_blank" rel="noopener noreferrer">${icon("play","style='width:16px;height:16px'")} Watch on YouTube</a>`:`<button class="btn btn-ghost btn-sm" data-play="${esc(r.id)}" data-kind="audio">${icon("audio","style='width:16px;height:16px'")} Listen</button>`).join("")}</div>${kinds.includes("video")&&r.video?cheerBtns(r.id):""}</div>`;
 }
+/* ---- newest first: the latest date is always on top; on the same date the item added last comes first ---- */
+function newestFirst(rows){return rows.map((r,i)=>[r,i]).sort((a,b)=>(b[0].date||"").localeCompare(a[0].date||"")||b[1]-a[1]).map(x=>x[0])}
+function groupNewest(rows){const g=[];newestFirst(rows).forEach(r=>{const k=r.group||"";let x=g.find(y=>y.k===k);if(!x){x={k,items:[]};g.push(x)}x.items.push(r)});return g.flatMap(x=>x.items)}
+const quizNum=a=>{const n=parseFloat(a.no);return isNaN(n)?Infinity:n};
+const quizSorted=()=>DATA.quizzes.map((a,i)=>[a,i]).sort((x,y)=>(quizNum(y[0])-quizNum(x[0]))||(y[1]-x[1])).map(x=>x[0]);
+const appsSorted=()=>[...DATA.apps].reverse();
 function recList(rows,kinds){
+  rows=groupNewest(rows);
   let html="",last=null;
   rows.forEach(r=>{if(r.group&&r.group!==last){html+=`<div class="grp">${esc(r.group)}</div>`;last=r.group}else if(!r.group)last=null;html+=recRow(r,kinds)});
   return html;
@@ -969,8 +976,9 @@ VIEWS.presentations=el=>{
   el.innerHTML=`<div class="toolbar"><input class="txt" id="q" type="search" placeholder="Search presentations by topic…" aria-label="Search presentations"><select class="txt" id="sort" aria-label="Sort"><option value="new">Newest first</option><option value="old">Oldest first</option></select></div><div id="out"></div>`;
   const draw=()=>{
     const q=norm($("#q",el).value.trim()),dir=$("#sort",el).value;
-    const rows=DATA.presentations.filter(p=>!q||norm(`${p.title} ${p.desc||""} ${fmtDate(p.date)}`).includes(q)).sort((a,b)=>dir==="new"?(b.date||"").localeCompare(a.date||""):(a.date||"").localeCompare(b.date||""));
-    $("#out",el).innerHTML=rows.length?rows.map(p=>{const L=pptLinks(p);return `<div class="pcard"><div class="ic">${icon("slides")}</div><div class="mid"><b>${esc(p.title)}</b><small>Released ${fmtDate(p.date)}${p.desc?" · "+esc(p.desc):""}</small></div>
+    const rows=DATA.presentations.filter(p=>!q||norm(`${p.title} ${p.desc||""} ${fmtDate(p.date)}`).includes(q)).map(p=>p);
+    const ordered=dir==="new"?newestFirst(rows):newestFirst(rows).reverse();
+    $("#out",el).innerHTML=ordered.length?ordered.map(p=>{const L=pptLinks(p);return `<div class="pcard"><div class="ic">${icon("slides")}</div><div class="mid"><b>${esc(p.title)}</b><small>Released ${fmtDate(p.date)}${p.desc?" · "+esc(p.desc):""}</small></div>
       <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-ghost btn-sm" data-ppt="${esc(p.id)}">View</button>${safeUrl(L.dl)?`<a class="btn btn-primary btn-sm" href="${esc(L.dl)}" target="_blank" rel="noopener noreferrer">${icon("download","style='width:16px;height:16px'")} Download PDF</a>`:""}</div></div>`}).join("")
       :`<div class="empty"><h3 class="serif">${q?"Nothing found":"No presentations yet"}</h3><p>${q?"Try a different word.":"Presentations will be posted here."}</p></div>`;
   };
@@ -978,7 +986,7 @@ VIEWS.presentations=el=>{
 };
 
 VIEWS.quiz=el=>{
-  const list=DATA.quizzes;
+  const list=quizSorted();
   if(!list.length){el.innerHTML=`<div class="empty"><h3 class="serif">Quizzes coming soon</h3><p>Practice quizzes will be listed here.</p></div>`;return}
   el.innerHTML=`<div class="toolbar"><input class="txt" id="q" type="search" placeholder="Search quizzes by name or number…" aria-label="Search quizzes"></div><div id="out"></div>`;
   const card=a=>`<div class="app"><h3>${a.no?`<span class="tag">Quiz ${esc(a.no)}</span><br>`:""}${esc(a.title)}</h3><p>${esc(a.desc||"")}</p>${safeUrl(a.url)?`<a class="btn btn-gold" href="${esc(a.url)}" target="_blank" rel="noopener noreferrer">${/^apps\//i.test(a.url)?"Open tool":"Start quiz"} ${icon("external","style='width:16px;height:16px'")}</a>`:""}</div>`;
@@ -994,7 +1002,7 @@ VIEWS.quiz=el=>{
 VIEWS.apps=el=>{
   const card=a=>`<div class="app"><h3>${esc(a.title)}</h3><p>${esc(a.desc||"")}</p>${safeUrl(a.url)?`<a class="btn btn-gold" href="${esc(a.url)}" target="_blank" rel="noopener noreferrer">Open ${icon("external","style='width:16px;height:16px'")}</a>`:""}</div>`;
   if(!DATA.apps.length){el.innerHTML=`<div class="empty"><h3 class="serif">Web applications coming soon</h3><p>Handy tools and calculators will be listed here.</p></div>`;return}
-  const groups=[];DATA.apps.forEach(a=>{const g=a.group||"";let x=groups.find(y=>y.g===g);if(!x){x={g,items:[]};groups.push(x)}x.items.push(a)});
+  const groups=[];appsSorted().forEach(a=>{const g=a.group||"";let x=groups.find(y=>y.g===g);if(!x){x={g,items:[]};groups.push(x)}x.items.push(a)});
   el.innerHTML=groups.map(x=>`${x.g?`<div class="section-h"><h3>${esc(x.g)}</h3></div>`:""}<div class="apps" style="margin-bottom:26px">${x.items.map(card).join("")}</div>`).join("");
 };
 
@@ -1114,7 +1122,7 @@ const pptFields=[{k:"title",label:"Title",req:1},{k:"desc",label:"Short descript
   {k:"link",label:"Presentation link",type:"url",req:1,hint:"Paste the Google Slides or Google Drive link. Sharing must be “Anyone with the link”. A direct .pptx link also works."},
   {k:"download",label:"Download link (optional)",type:"url",hint:"Leave empty – the download link is created automatically."}];
 function adminPpts(body){
-  const rows=[...DATA.presentations].sort((a,b)=>(b.date||"").localeCompare(a.date||""));
+  const rows=newestFirst(DATA.presentations);
   body.innerHTML=`<div style="margin-bottom:14px"><button class="btn btn-gold" data-a="add">+ Add presentation</button></div>${rows.map(p=>listRow(esc(p.title),`Released ${fmtDate(p.date)}`,aBtn("edit",p.id,"Edit")+aBtn("del",p.id,"Delete","btn-danger"))).join("")||'<div class="empty">No presentations yet.</div>'}`;
   bind(body,{
     add:()=>showForm({title:"Add presentation",fields:pptFields,values:{date:new Date().toISOString().slice(0,10)},onSubmit:async v=>{DATA.presentations.push({id:uid("p"),...v});await commit()}}),
@@ -1124,7 +1132,7 @@ function adminPpts(body){
 /* --- web apps --- */
 const appFields=[{k:"group",label:"Group (optional)",ph:"e.g. Ready Reckoners"},{k:"title",label:"Name",req:1},{k:"desc",label:"What it does",type:"textarea",rows:3},{k:"url",label:"Link",type:"url",req:1}];
 function adminApps(body){
-  body.innerHTML=`<div style="margin-bottom:14px"><button class="btn btn-gold" data-a="add">+ Add web application</button></div>${DATA.apps.map(a=>listRow(esc(a.title),esc(a.url),aBtn("edit",a.id,"Edit")+aBtn("del",a.id,"Delete","btn-danger"))).join("")||'<div class="empty">No web applications yet.</div>'}`;
+  body.innerHTML=`<div style="margin-bottom:14px"><button class="btn btn-gold" data-a="add">+ Add web application</button></div>${appsSorted().map(a=>listRow(esc(a.title),esc(a.url),aBtn("edit",a.id,"Edit")+aBtn("del",a.id,"Delete","btn-danger"))).join("")||'<div class="empty">No web applications yet.</div>'}`;
   bind(body,{
     add:()=>showForm({title:"Add web application",fields:appFields,onSubmit:async v=>{DATA.apps.push({id:uid("a"),...v});await commit()}}),
     edit:id=>{const a=DATA.apps.find(x=>x.id===id);showForm({title:"Edit web application",fields:appFields,values:a,onSubmit:async v=>{Object.assign(a,v);await commit()}})},
@@ -1133,7 +1141,7 @@ function adminApps(body){
 /* --- quiz --- */
 const quizFields=[{k:"group",label:"Group (optional)",ph:"e.g. Quizzes (Google Forms)"},{k:"no",label:"Quiz number (optional)",ph:"e.g. 27"},{k:"title",label:"Quiz name",req:1},{k:"desc",label:"Short note (optional)",type:"textarea",rows:2},{k:"url",label:"Link",type:"url",req:1}];
 function adminQuiz(body){
-  body.innerHTML=`<div style="margin-bottom:14px"><button class="btn btn-gold" data-a="add">+ Add quiz</button></div>${DATA.quizzes.map(a=>listRow((a.no?esc(a.no)+". ":"")+esc(a.title),esc(a.url),aBtn("edit",a.id,"Edit")+aBtn("del",a.id,"Delete","btn-danger"))).join("")||'<div class="empty">No quizzes yet.</div>'}`;
+  body.innerHTML=`<div style="margin-bottom:14px"><button class="btn btn-gold" data-a="add">+ Add quiz</button></div>${quizSorted().map(a=>listRow((a.no?esc(a.no)+". ":"")+esc(a.title),esc(a.url),aBtn("edit",a.id,"Edit")+aBtn("del",a.id,"Delete","btn-danger"))).join("")||'<div class="empty">No quizzes yet.</div>'}`;
   bind(body,{
     add:()=>showForm({title:"Add quiz",fields:quizFields,onSubmit:async v=>{DATA.quizzes.push({id:uid("q"),...v});await commit()}}),
     edit:id=>{const a=DATA.quizzes.find(x=>x.id===id);showForm({title:"Edit quiz",fields:quizFields,values:a,onSubmit:async v=>{Object.assign(a,v);await commit()}})},
@@ -1202,8 +1210,8 @@ function adminSessionEditor(body){
   const ongoing=s.status==="ongoing";
   body.innerHTML=head+`<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px"><button class="btn btn-gold" data-a="addrec">+ Add recording</button>
       ${ongoing?`<button class="btn btn-primary" data-a="complete">✓ Mark as completed (open to all)</button><button class="btn btn-ghost" data-a="chpw">Change password</button>`:`<button class="btn btn-ghost" data-a="makeongoing">Make this an ongoing (locked) session</button>`}</div>
-    ${recs.map((r,i)=>listRow(`${esc(r.title)}`,`${fmtDate(r.date)}${r.group?" · "+esc(r.group):""} · ${[r.video?"Video":"",r.audio?"Audio":""].filter(Boolean).join(" + ")||"no links"}`,
-      `<button class="btn btn-ghost btn-sm" data-a="up" data-id="${i}" ${i===0?"disabled":""} aria-label="Move up">${icon("up","style='width:14px;height:14px'")}</button><button class="btn btn-ghost btn-sm" data-a="down" data-id="${i}" ${i===recs.length-1?"disabled":""} aria-label="Move down">${icon("down","style='width:14px;height:14px'")}</button>`+aBtn("editrec",r.id,"Edit")+aBtn("delrec",r.id,"Delete","btn-danger"))).join("")||'<div class="empty">No recordings yet. Press “Add recording”.</div>'}`;
+    ${newestFirst(recs).map((r,i)=>listRow(`${esc(r.title)}`,`${fmtDate(r.date)}${r.group?" · "+esc(r.group):""} · ${[r.video?"Video":"",r.audio?"Audio":""].filter(Boolean).join(" + ")||"no links"}`,
+      ""+aBtn("editrec",r.id,"Edit")+aBtn("delrec",r.id,"Delete","btn-danger"))).join("")||'<div class="empty">No recordings yet. Press “Add recording”.</div>'}`;
   const move=async(i,d)=>{i=+i;const j=i+d;if(j<0||j>=recs.length)return;[recs[i],recs[j]]=[recs[j],recs[i]];await commit()};
   bind(body,{
     back:()=>{AS.sess=null;rerender()},
