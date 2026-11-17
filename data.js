@@ -1,6 +1,6 @@
 /* CS KNOWLEDGE ACADEMY – site content. Edit through the Admin page, then replace this file. */
 window.CSK_DATA = {
- "updated": 1794920225804,
+ "updated": 1794921366349,
  "settings": {
   "whatsapp": "919500076095",
   "email": "csridharanlic@gmail.com",
@@ -1136,6 +1136,14 @@ window.CSK_DATA = {
    "title": "Preferred Non Medical",
    "desc": "",
    "url": "https://docs.google.com/forms/d/e/1FAIpQLSdp0QduQOPMoUxgkUowUVftmcOlfdaFeJE7Cqugvsuu2W8y4w/viewform?usp=header"
+  },
+  {
+   "id": "qmai122",
+   "group": "Quizzes (Google Forms)",
+   "no": "27",
+   "title": "NRI FNIO (TAMIL)",
+   "desc": "",
+   "url": "https://docs.google.com/forms/d/e/1FAIpQLScomanmFi6hkeadR1nxWsVoVVBvL4HxCU4CWVRtQWKOX1148A/viewform"
   }
  ],
  "upcoming": [
