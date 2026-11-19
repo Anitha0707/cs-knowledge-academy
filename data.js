@@ -1,6 +1,6 @@
 /* CS KNOWLEDGE ACADEMY – site content. Edit through the Admin page, then replace this file. */
 window.CSK_DATA = {
- "updated": 1794921366349,
+ "updated": 1795091615903,
  "settings": {
   "whatsapp": "919500076095",
   "email": "csridharanlic@gmail.com",
@@ -144,6 +144,33 @@ window.CSK_DATA = {
      "lang": "tamil",
      "group": "",
      "video": "https://www.youtube.com/watch?v=KPWgfA-ByxI",
+     "audio": ""
+    },
+    {
+     "id": "r2kunw8",
+     "date": "2026-11-17",
+     "title": "Key Man Insurance Partnership Insurance MWP Act",
+     "lang": "tamil",
+     "group": "",
+     "video": "https://www.youtube.com/watch?v=xv3I-RqV45I",
+     "audio": ""
+    },
+    {
+     "id": "rl8idul",
+     "date": "2026-11-18",
+     "title": "Dating Back Advantage",
+     "lang": "tamil",
+     "group": "",
+     "video": "https://www.youtube.com/watch?v=cThkTTpn5l0",
+     "audio": ""
+    },
+    {
+     "id": "ri4kmct",
+     "date": "2026-11-18",
+     "title": "Settlement Options",
+     "lang": "tamil",
+     "group": "",
+     "video": "https://www.youtube.com/watch?v=uaUQOfJ-PUU",
      "audio": ""
     }
    ]
@@ -855,6 +882,38 @@ window.CSK_DATA = {
    "date": "2026-11-15",
    "link": "https://drive.google.com/file/d/10OD9iTKplX9lp4ziQ80KMz6BlwyGB37u/view?usp=sharing",
    "download": "https://drive.google.com/file/d/10OD9iTKplX9lp4ziQ80KMz6BlwyGB37u/view?usp=sharing"
+  },
+  {
+   "id": "p7ilr3m",
+   "title": "cs Dating back",
+   "desc": "",
+   "date": "2026-11-18",
+   "link": "https://drive.google.com/file/d/1fZIQ1dV-VDd9NbjU0efRsf0iJbn8ulDu/view?usp=sharing",
+   "download": "https://drive.google.com/file/d/1fZIQ1dV-VDd9NbjU0efRsf0iJbn8ulDu/view?usp=sharing"
+  },
+  {
+   "id": "p2cty5c",
+   "title": "cs MWP Act",
+   "desc": "",
+   "date": "2026-11-18",
+   "link": "https://drive.google.com/file/d/1OXeAm-De5TI5HUMSbJEpao1Tkwqhb-eW/view?usp=sharing",
+   "download": ""
+  },
+  {
+   "id": "p3oepvb",
+   "title": "cs Settlement Options",
+   "desc": "",
+   "date": "2026-11-19",
+   "link": "https://drive.google.com/file/d/1N2-tB7bWN9x50n6D1JT82MFBtTVUVWNW/view?usp=sharing",
+   "download": "https://drive.google.com/file/d/1N2-tB7bWN9x50n6D1JT82MFBtTVUVWNW/view?usp=sharing"
+  },
+  {
+   "id": "pu1tcgd",
+   "title": "cs Employer Employee",
+   "desc": "",
+   "date": "2026-11-18",
+   "link": "https://drive.google.com/file/d/1vuxfmBHbcmIOZxSOYicyvEmCOvDKoySW/view?usp=sharing",
+   "download": ""
   }
  ],
  "apps": [
